@@ -1,0 +1,217 @@
+﻿@{
+    // Prevent layout from rendering navigation for unauthenticated pages
+    bool isLoggedIn = User?.Identity?.IsAuthenticated == true;
+
+    Layout = null;
+    var userName = isLoggedIn ? User.Identity?.Name : "Guest";
+}
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · UtilityONE</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <!-- Site-wide CSS -->
+    <link href="~/css/site.css" rel="stylesheet" />
+
+    @RenderSection("Styles", required: false)
+</head>
+<body class="bg-body">
+
+    @* ============================
+       TOP BAR — ONLY IF LOGGED IN
+       ============================ *@
+    @if (isLoggedIn)
+    {
+            <nav class="navbar navbar-expand-lg ums-appbar bg-body border-bottom sticky-top" role="navigation" aria-label="Top navigation">
+                <div class="container-fluid ums-container">
+
+                    <button class="btn btn-outline-primary btn-sm me-2" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#umsSidebar" aria-controls="umsSidebar"
+                            aria-label="Open navigation">
+                        <i class="bi bi-list"></i>
+                    </button>
+
+                    <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="/Dashboard">
+                            <i class="bi bi-grid-3x3-gap text-primary" style="font-size: 1.5rem;"></i>
+                        UtilityONE
+                    </a>
+
+                    <div class="ms-auto d-flex align-items-center gap-2">
+
+                        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button" aria-label="Toggle theme">
+                            <i class="bi bi-brightness-high" id="themeIcon"></i>
+                        </button>
+
+                        <div class="vr d-none d-lg-block"></div>
+
+                        <span class="d-none d-md-inline text-body-secondary">Hello, @userName</span>
+
+                        <a href="/Account/Logout" class="btn btn-sm btn-danger">
+                            <i class="bi bi-box-arrow-right me-1"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </nav>
+    }
+
+    @* ===============================
+       SIDEBAR — ONLY IF LOGGED IN
+       =============================== *@
+    @if (isLoggedIn)
+    {
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="umsSidebar" aria-labelledby="umsSidebarLabel" style="width: 280px;">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title ums-sidebar-header" id="umsSidebarLabel">
+                        <i class="bi bi-grid-1x2"></i> Navigation
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+
+                <div class="offcanvas-body d-flex flex-column">
+
+                            <nav class="nav flex-column ums-nav" aria-label="Primary">
+
+        <a class="nav-link" href="/Dashboard/Index">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+        </a>
+
+                    @* -------------------------------
+       Administrative Staff
+       ------------------------------- *@
+                    @if (User.IsInRole("Admin") || User.IsInRole("AdministrativeStaff"))
+                    {
+                <a class="nav-link" href="/Customers/Index">
+                    <i class="bi bi-people me-2"></i> Customers
+                </a>
+                <a class="nav-link" href="/Meters/Index">
+                    <i class="bi bi-hdd-network me-2"></i> Meters
+                </a>
+                <a class="nav-link" href="/Tariffs/Index">
+                    <i class="bi bi-cash-stack me-2"></i> Tariffs
+                </a>
+                <a class="nav-link" href="/Complaints/Index">
+                    <i class="bi bi-chat-left-text me-2"></i> Complaints
+                </a>
+                    }
+
+                    @* -------------------------------
+       Field Officers / Meter Readers
+       ------------------------------- *@
+                    @if (User.IsInRole("Field Officer"))
+                    {
+                <a class="nav-link" href="/MeterReadings/Index">
+                    <i class="bi bi-pencil-square me-2"></i> Meter Readings
+                </a>
+                    }
+
+                    @* -------------------------------
+       Cashiers / Billing Clerks
+       ------------------------------- *@
+                    @if (User.IsInRole("Cashier"))
+                    {
+                <a class="nav-link" href="/Billing/Index">
+                    <i class="bi bi-receipt me-2"></i> Billing
+                </a>
+                <a class="nav-link" href="/Payments/Index">
+                    <i class="bi bi-credit-card-2-back me-2"></i> Payments
+                </a>
+                    }
+
+                    @* -------------------------------
+       Managers / Decision Makers
+       ------------------------------- *@
+                    @if (User.IsInRole("Manager"))
+                    {
+                <a class="nav-link" href="/Reports/Index">
+                    <i class="bi bi-bar-chart-line me-2"></i> Reports
+                </a>
+                    }
+
+                    @* -------------------------------
+       Admin specific
+       ------------------------------- *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                <div class="mt-3 pt-3 border-top">
+                    <small class="text-body-secondary text-uppercase">Admin</small>
+                    <a class="nav-link mt-2" href="/Users/Index">
+                        <i class="bi bi-shield-lock me-2"></i> Manage Users
+                    </a>
+                </div>
+                    }
+    </nav>
+
+
+
+                    <div class="mt-auto pt-3 ums-footer">
+                        <small>&copy; @(DateTime.Now.Year) UtilityONE </small>
+                    </div>
+                </div>
+            </div>
+    }
+
+    <!-- Main Content -->
+    <main class="container-fluid ums-container ums-content">
+        @RenderBody()
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Layout Scripts -->
+    <script>
+        (function () {
+            const path = window.location.pathname.toLowerCase();
+            document.querySelectorAll('.ums-nav .nav-link').forEach(link => {
+                const href = (link.getAttribute('href') || '').toLowerCase();
+                if (href && (path === href || path.startsWith(href))) {
+                    link.classList.add('active');
+                }
+            });
+        })();
+
+        (function () {
+            const root = document.documentElement;
+            const toggleBtn = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const key = 'ums-theme';
+            const stored = localStorage.getItem(key);
+
+            function setIcon(theme) {
+                icon.className = theme === 'dark' ? 'bi bi-moon-stars' : 'bi bi-brightness-high';
+            }
+
+            const initial = stored || root.getAttribute('data-bs-theme') || 'light';
+            root.setAttribute('data-bs-theme', initial);
+            setIcon(initial);
+
+            toggleBtn?.addEventListener('click', () => {
+                const current = root.getAttribute('data-bs-theme') || 'light';
+                const next = current === 'light' ? 'dark' : 'light';
+                root.setAttribute('data-bs-theme', next);
+                localStorage.setItem(key, next);
+                setIcon(next);
+            });
+        })();
+
+        (function () {
+            const sidebar = document.getElementById('umsSidebar');
+            const offcanvas = sidebar ? bootstrap.Offcanvas.getOrCreateInstance(sidebar) : null;
+            document.querySelectorAll('.ums-nav .nav-link').forEach(link => {
+                link.addEventListener('click', () => offcanvas?.hide());
+            });
+        })();
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

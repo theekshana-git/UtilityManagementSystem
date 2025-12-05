@@ -1,0 +1,28 @@
+# Build directories
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.cache
+*.pdb
+
+# Visual Studio
+.vs/
+.vscode/
+
+# Logs
+*.log
+
+# Database files
+*.mdf
+*.ldf
+*.db
+
+# Secrets
+appsettings.Development.json
+appsettings.Local.json
+
+# Publish output
+publish/

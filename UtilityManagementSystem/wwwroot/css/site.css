@@ -1,0 +1,185 @@
+﻿
+/* -------- Base -------- */
+body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    color: var(--bs-primary);
+}
+
+    a:hover {
+        color: var(--bs-primary-hover, var(--bs-primary));
+    }
+
+/* Buttons & Inputs */
+.btn {
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+.form-control {
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Cards */
+.card {
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Tables */
+.table {
+    border-collapse: collapse;
+}
+
+    .table th,
+    .table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--bs-secondary-bg);
+}
+
+/* Navbar/Appbar helpers */
+.ums-appbar {
+    backdrop-filter: saturate(180%) blur(6px);
+}
+
+/* Sidebar / navigation */
+.ums-sidebar-header {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.ums-nav .nav-link {
+    border-radius: 0.5rem;
+    color: var(--bs-body-color);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+    .ums-nav .nav-link:hover {
+        background-color: var(--bs-secondary-bg);
+    }
+
+    .ums-nav .nav-link.active {
+        background-color: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+        font-weight: 600;
+    }
+
+/* Content wrapper spacing */
+.ums-content {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+}
+
+/* Footer */
+.ums-footer {
+    border-top: 1px solid var(--bs-border-color);
+    color: var(--bs-secondary-color);
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* -------- Dark mode overrides -------- */
+[data-bs-theme="dark"] {
+    --bs-body-color: #e6e6e6; /* slightly brighter text */
+}
+
+    /* Softer card shadow in dark mode */
+    [data-bs-theme="dark"] .card {
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Better stripe contrast in dark mode */
+    [data-bs-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    /* Fix table header (Recent Payments) in dark mode: no bright white */
+    [data-bs-theme="dark"] thead.table-light {
+        background-color: var(--bs-secondary-bg) !important;
+        color: var(--bs-body-color) !important;
+        border-color: var(--bs-border-color) !important;
+    }
+
+/* Utility classes */
+.text-small {
+    font-size: 0.85rem;
+}
+
+.rounded-lg {
+    border-radius: 0.75rem;
+}
+
+/* Login page visual tweaks (optional) */
+.card.rounded-lg {
+    border-radius: 0.75rem;
+}
+
+/* -------- Dashboard hover + compact adjustments -------- */
+
+/* Card hover: subtle lift and border accent */
+.card.card-hover {
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    border: 1px solid transparent;
+    will-change: transform, box-shadow;
+}
+
+    .card.card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        border-color: var(--bs-border-color);
+    }
+
+/* Optional: faint brand accent on hover (uncomment if you want more pop) */
+/*
+.card-hover:hover {
+    border-color: var(--bs-primary);
+}
+*/
+
+/* Chart wrapper: fixed compact height for full visibility without scrolling */
+.chart-wrap {
+    height: 320px; /* adjust to 240px if you need even less vertical space */
+    position: relative;
+}
+
+    /* Ensure canvas fills the wrapper (prevents 0-height issues) */
+    .chart-wrap canvas {
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+
+
+/* Slightly more compact section spacing to fit everything neatly */
+.ums-content > .card {
+    margin-bottom: 0.75rem;
+}
+
+.ums-content .row.g-3 {
+    row-gap: 0.75rem;
+}
+
+/* Optional: slightly smaller metric numbers on wide screens to avoid scroll */
+@media (min-width: 992px) {
+    .metric-num.fs-3 {
+        font-size: 1.6rem;
+    }
