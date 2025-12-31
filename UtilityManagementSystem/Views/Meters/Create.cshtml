@@ -1,5 +1,53 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model UtilityManagementSystem.ViewModels.MetersViewModel
+
 @{
+    ViewData["Title"] = "Register Meter";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Create" method="post" class="hover-lift" style="max-width: 400px;">
+    <div class="form-group mb-3">
+        <label asp-for="CustomerId">Customer</label>
+        <select asp-for="CustomerId" class="form-control" asp-items="Model.CustomerList">
+            <option value="">-- Select Customer --</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="UtilityId">Utility Type</label>
+        <select asp-for="UtilityId" class="form-control" asp-items="Model.UtilityList">
+            <option value="">-- Select Utility --</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Location">Location</label>
+        <input asp-for="Location" class="form-control" />
+    </div>
+
+    <div class="form-group mb-4">
+        <label asp-for="Status">Status</label>
+        <select asp-for="Status" class="form-control">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Register Meter</button>
+</form>
+
+@section Styles {
+    <style>
+        .hover-lift {
+            transition: transform .2s ease, box-shadow .2s ease;
+            display: inline-block;
+            width: 100%;
+        }
+
+            .hover-lift:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+            }
+    </style>
 }

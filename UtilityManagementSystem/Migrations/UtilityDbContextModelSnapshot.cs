@@ -17,7 +17,7 @@ namespace UtilityManagementSystem.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.22")
+                .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -585,9 +585,9 @@ namespace UtilityManagementSystem.Migrations
                         .HasColumnType("int")
                         .HasColumnName("CustomerID");
 
-                    b.Property<DateOnly?>("PaymentDate")
+                    b.Property<DateTime>("PaymentDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("date")
+                        .HasColumnType("datetime2")
                         .HasDefaultValueSql("(getdate())");
 
                     b.Property<string>("PaymentMethod")
