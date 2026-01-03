@@ -1,5 +1,100 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model UtilityManagementSystem.ViewModels.CustomersViewModel
+
+<h2>Customer Details</h2>
+
+<p><b>Name:</b> @Model.Name</p>
+<p><b>Status:</b> @(Model.IsActive ? "Active" : "Inactive")</p>
+<p><b>Outstanding:</b> @Model.Outstanding.ToString("Rs #,##0.00")</p>
+
+<h4>Meters</h4>
+<table class="table">
+    <colgroup>
+        <col style="width: 50%">
+        <col style="width: 50%">
+    </colgroup>
+    <thead>
+        <tr>
+            <th>Meter Number</th>
+            <th>Installation Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model.Meters)
+        {
+            <tr>
+                <td>@m.MeterNumber</td>
+                <td>@m.InstallationDate.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table><br/>
+
+<h4>Unpaid Bills</h4>
+<table class="table">
+    <colgroup>
+        <col style="width: 50%">
+        <col style="width: 50%">
+    </colgroup>
+    <thead>
+        <tr>
+            <th>Amount</th>
+            <th>Due Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in Model.UnpaidBills)
+        {
+            <tr>
+                <td>@b.Amount.ToString("Rs #,##0.00")</td>
+                <td>@b.DueDate.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table><br/>
+
+<h4>Recent Payment</h4>
+<table class="table">
+    <colgroup>
+        <col style="width: 50%">
+        <col style="width: 50%">
+    </colgroup>
+    <thead>
+        <tr>
+            <th>Amount Paid</th>
+            <th>Payment Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model.Payments)
+        {
+            <tr>
+                <td>@p.Amount.ToString("Rs #,##0.00")</td>
+                <td>@p.Date.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary m-3" id="toggleUsageBtn">
+    Usage Summary
+</button>
+
+<a asp-action="Index" class="btn btn-secondary">Back</a>
+
+@if (Model.UsageSummary != null)
+{
+    <div id="usageSummary" style="display:none;">
+        <h4>Usage Summary</h4>
+        <p><b>Total Usage:</b> @Model.UsageSummary.TotalUsage</p>
+        <p><b>Avg / Month:</b> @Model.UsageSummary.AvgUsagePerMonth</p>
+    </div>
 }
+
+<script>
+    document.getElementById("toggleUsageBtn")?.addEventListener("click", function () {
+        const div = document.getElementById("usageSummary");
+        if (div) {
+            div.style.display = div.style.display === "none" ? "block" : "none";
+        }
+    });
+</script>

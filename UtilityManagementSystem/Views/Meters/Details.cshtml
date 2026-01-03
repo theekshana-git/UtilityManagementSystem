@@ -1,5 +1,45 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model UtilityManagementSystem.Models.Meter
+
 @{
+    ViewData["Title"] = "Meter Details";
 }
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card p-3 mb-3">
+    <h4>Meter Info</h4>
+    <p><strong>Meter ID:</strong> @Model.MeterId</p>
+    <p><strong>Customer:</strong> @Model.Customer.FirstName @Model.Customer.LastName</p>
+    <p><strong>Utility:</strong> @Model.Utility.UtilityName</p>
+    <p><strong>Location:</strong> @Model.Location</p>
+    <p><strong>Status:</strong> @Model.Status</p>
+</div>
+
+<h4>Recent Readings</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Reading Date</th>
+            <th>Previous Reading</th>
+            <th>Current Reading</th>
+            <th>Consumption</th>
+            <th>Recorded By</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reading in Model.MeterReadings.OrderByDescending(r => r.ReadingDate).Take(5))
+        {
+            <tr>
+                <td>@reading.ReadingDate.ToString("yyyy-MM-dd")</td>
+                <td>@reading.PreviousReading</td>
+                <td>@reading.CurrentReading</td>
+                <td>@reading.Consumption</td>
+                <td>@reading.RecordedByNavigation.FirstName @reading.RecordedByNavigation.LastName</td>
+                <td>@reading.Notes</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

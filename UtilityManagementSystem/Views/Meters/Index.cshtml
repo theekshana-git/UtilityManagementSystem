@@ -1,6 +1,186 @@
-﻿@{
-    ViewData["Title"] = "Meters";
+﻿@model IEnumerable<UtilityManagementSystem.Models.Meter>
+
+@{
+    ViewData["Title"] = "Meters List";
 }
 
-<h1>Meters</h1>
-<p>Placeholder view</p>
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">@ViewData["Title"]</h2>
+
+    <div class="card shadow-sm rounded-lg mb-3 card-hover" style="border:none;">
+        <div class="card-body p-3">
+            <form method="get" asp-action="Index" class="d-flex flex-wrap gap-3 align-items-end">
+
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Customer</label>
+                    <select name="customerId" class="form-control">
+                        <option value="">All</option>
+                        @foreach (var customer in Model.Select(m => m.Customer).Distinct())
+                        {
+                            <option value="@customer.CustomerId">@customer.FirstName @customer.LastName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Utility</label>
+                    <select name="utilityId" class="form-control">
+                        <option value="">All</option>
+                        @foreach (var utility in Model.Select(m => m.Utility).Distinct())
+                        {
+                            <option value="@utility.UtilityId">@utility.UtilityName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a asp-action="Create" class="btn btn-success">Register New Meter</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm rounded-lg mb-3 card-hover" style="border:1px solid var(--bs-border-color); overflow:hidden;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table id="metersTable" class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Meter ID</th>
+                            <th>Customer</th>
+                            <th>Utility</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Last Reading</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metersTableBody">
+                        @for (int i = 0; i < Model.Count(); i++)
+                        {
+                            var meter = Model.ElementAt(i);
+                            var lastReading = meter.MeterReadings
+                            .OrderByDescending(r => r.ReadingDate)
+                            .FirstOrDefault()?.CurrentReading ?? 0;
+
+                            <tr class="meter-row @(i >= 5 ? "d-none" : "")">
+                                <td>@meter.MeterId</td>
+                                <td>@meter.Customer.FirstName @meter.Customer.LastName</td>
+                                <td>@meter.Utility.UtilityName</td>
+                                <td>@meter.Location</td>
+                                <td>
+                                    <span class="status-badge @(meter.Status == "Active" ? "status-active" : "status-inactive")">
+                                        @meter.Status
+                                    </span>
+                                </td>
+                                <td>@lastReading</td>
+                                <td>
+                                    <form asp-action="ToggleStatus" method="post" asp-route-id="@meter.MeterId" data-status="@meter.Status" class="d-inline" onsubmit="return confirmToggle(this);">
+                                        <button type="submit" class="btn btn-sm @(meter.Status == "Active" ? "btn-danger" : "btn-success")">
+                                            @(meter.Status == "Active" ? "Deactivate" : "Activate")
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.Count() > 5)
+            {
+                <div class="py-2 text-center">
+                    <a href="javascript:void(0);" class="btn btn-link" id="showMoreBtn">Show More</a>
+                    <a href="javascript:void(0);" class="btn btn-link d-none" id="showLessBtn">Show Less</a>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
+
+@section Styles {
+    <style>
+        .card-hover {
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            will-change: transform, box-shadow;
+        }
+
+            .card-hover:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0 0 2px rgba(13,110,253,0.25), 0 8px 20px rgba(0,0,0,0.10);
+            }
+
+        .status-badge {
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .status-active {
+            color: #22c55e;
+            background-color: rgba(34,197,94,0.2);
+        }
+
+        .status-inactive {
+            color: #ef4444;
+            background-color: rgba(239,68,68,0.2);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function confirmToggle(form) {
+            let currentStatus = form.dataset.status;
+            let action = currentStatus === "Active" ? "deactivate" : "activate";
+
+            if (!confirm(`Are you sure you want to ${action} this meter?`)) return false;
+
+            $.post(form.action, $(form).serialize())
+                .done(() => {
+                    let newStatus = currentStatus === "Active" ? "Inactive" : "Active";
+                    form.dataset.status = newStatus; // 🔑 update state
+
+                    let badge = $(form).closest('tr').find('.status-badge');
+                    let btn = $(form).find('button');
+
+                    if (newStatus === "Active") {
+                        badge.text('Active').removeClass('status-inactive').addClass('status-active');
+                        btn.text('Deactivate').removeClass('btn-success').addClass('btn-danger');
+                    } else {
+                        badge.text('Inactive').removeClass('status-active').addClass('status-inactive');
+                        btn.text('Activate').removeClass('btn-danger').addClass('btn-success');
+                    }
+                })
+                .fail(() => alert("Database update failed"));
+
+            return false;
+        }
+
+
+        const showMoreBtn = document.getElementById('showMoreBtn');
+        const showLessBtn = document.getElementById('showLessBtn');
+        const rows = document.querySelectorAll('.meter-row');
+
+        showMoreBtn?.addEventListener('click', function () {
+            rows.forEach(r => r.classList.remove('d-none'));
+            showMoreBtn.classList.add('d-none');
+            showLessBtn.classList.remove('d-none');
+        });
+
+        showLessBtn?.addEventListener('click', function () {
+            rows.forEach((r, index) => {
+                if (index >= 5) r.classList.add('d-none');
+            });
+            showLessBtn.classList.add('d-none');
+            showMoreBtn.classList.remove('d-none');
+        });
+    </script>
+}
