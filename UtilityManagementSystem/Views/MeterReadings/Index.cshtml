@@ -1,6 +1,485 @@
-﻿@{
+﻿@model IEnumerable<UtilityManagementSystem.Models.MeterReading>
+
+@{
     ViewData["Title"] = "Meter Readings";
+    var totalReadings = Model.Count();
+    var avgConsumption = totalReadings > 0 ? Math.Round(Model.Average(m => m.Consumption ?? 0), 1) : 0;
+    var highUsageCount = Model.Count(m => m.Consumption > 100);
 }
 
-<h1>Meter Readings</h1>
-<p>Placeholder view</p>
+<style>
+  
+    :root {
+        --bg-body: transparent;
+        --bg-card: #212529;
+        --input-bg: #16191c;
+        --text-main: #ffffff;
+        --text-gray: #ffffff;
+        --border-color: var(--bs-border-color);
+        --row-border: var(--bs-border-color);
+        --row-stripe: #262a2e;
+        --row-hover: #2a2f36;
+        --color-blue: var(--bs-primary);
+        --color-green: var(--bs-success);
+        --color-red: var(--bs-danger);
+        --color-orange: var(--bs-warning);
+        --table-header-bg: #ffffff;
+        --table-header-text: #000000;
+    }
+
+    [data-bs-theme="light"], body.light-mode {
+        --bg-body: #f5f8fa;
+        --bg-card: #ffffff;
+        --input-bg: #f5f8fa;
+        --text-main: #181c32;
+        --text-gray: #7e8299;
+        --border-color: #eff2f5;
+        --row-border: #eff2f5;
+        --row-stripe: rgba(0, 0, 0, 0.02);
+        --row-hover: rgba(0, 0, 0, 0.04);
+    }
+
+
+    body {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+       
+        
+    }
+
+    .container-fluid {
+        padding: 0;
+        width: 100%;
+    }
+
+    h3 {
+        padding: 20px 20px 10px 20px;
+        color: var(--text-main);
+    }
+
+  
+    .card-container {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+        .card-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+   
+    .stat-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: var(--text-gray);
+        font-size: 0.85rem;
+        font-weight: 600;
+       
+    }
+
+    .border-blue {
+        border: 1px solid var(--color-blue);
+    }
+
+    .border-green {
+        border: 1px solid var(--color-green);
+    }
+
+    .border-red {
+        border: 1px solid var(--color-red);
+    }
+
+    .icon-wrapper {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+
+    .input-label {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: block;
+        font-weight: 500;
+    }
+
+    .input-dark {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 10px 15px;
+        border-radius: 6px;
+        width: 100%;
+     
+    }
+
+        .input-dark:focus {
+            border-color: var(--color-blue);
+            outline: none;
+        }
+
+    .date-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .date-text {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+    }
+
+    .table-wrapper {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 750px;
+    }
+
+        .table-custom thead th {
+            color: var(--text-main) !important;
+            padding: 15px;
+           font: 14px;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--row-stripe) !important;
+          
+        }
+
+        .table-custom tbody tr {
+            border-bottom: 1px solid var(--row-border);
+
+        }
+
+            .table-custom tbody tr:nth-child(even) {
+                background-color: var(--row-stripe);
+            }
+
+            .table-custom tbody tr:hover {
+                background-color: var(--row-hover);
+                transform: scale(1.002);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+                z-index: 5;
+                position: relative;
+            }
+
+        .table-custom tbody td {
+            padding: 15px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+    
+    .btn-solid-green {
+        background-color: var(--color-green);
+        color: white;
+        padding: 10px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-block;
+        border: none;
+
+    }
+
+        .btn-solid-green:hover {
+            background-color: #42b876;
+            transform: scale(1.02);
+            color: white;
+        }
+
+    .btn-solid-blue {
+        background-color: var(--color-blue);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+
+    }
+
+        .btn-solid-blue:hover {
+            background-color: #0089d6;
+            transform: scale(1.02);
+        }
+
+    .btn-solid-gray {
+        background-color: var(--color-red);
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-weight: 600;
+
+    }
+
+        .btn-solid-gray:hover {
+            background-color: #FF4D2E;
+            color: white;
+        }
+
+    .show-more-wrapper {
+        padding: 15px;
+        text-align: center;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .show-more-btn {
+        background: none;
+        border: none;
+        color: var(--color-blue);
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .d-none-custom {
+        display: none;
+    }
+</style>
+
+<div class="container-fluid">
+    <h3 class="fw-bold mb-4">Meter Readings</h3>
+
+    <div class="row g-4 px-3 mb-4">
+        <div class="col-md-4">
+            <div class="card-container stat-card border-blue">
+                <div class="icon-wrapper" style="color: var(--color-blue);"><i class="bi bi-lightning-charge"></i></div>
+                <div class="stat-label">Total Readings</div>
+                <h2 class="stat-number">@totalReadings</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-container stat-card border-green">
+                <div class="icon-wrapper" style="color: var(--color-green);"><i class="bi bi-book"></i></div>
+                <div class="stat-label">Avg. Consumption</div>
+                <h2 class="stat-number">@avgConsumption</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-container stat-card border-red">
+                <div class="icon-wrapper" style="color: var(--color-red);"><i class="bi bi-exclamation-triangle"></i></div>
+                <div class="stat-label">High Usage Alerts</div>
+                <h2 class="stat-number">@highUsageCount</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-3">
+        <div class="card-container mb-4">
+            <div class="row align-items-end g-3">
+                <div class="col-md-3">
+                    <label class="input-label">Customer / Location</label>
+                    <input type="text" id="searchInput" class="input-dark" placeholder="Search..." list="searchSuggestions">
+                    <datalist id="searchSuggestions">
+                        @foreach (var item in Model)
+                        {
+                            <option value="@item.Meter?.Customer?.FirstName @item.Meter?.Customer?.LastName"></option>
+                            <option value="@item.Meter?.Location"></option>
+                        }
+                    </datalist>
+                </div>
+                <div class="col-md-4">
+                    <label class="input-label">Date Range</label>
+                    <div class="date-wrapper">
+                        <input type="date" id="startDate" class="input-dark">
+                        <span class="date-text">to</span>
+                        <input type="date" id="endDate" class="input-dark">
+                    </div>
+                </div>
+                <div class="col-md-5 text-end">
+                    <button class="btn-solid-blue me-1" onclick="applyFilters()">Filter</button>
+                    <button class="btn-solid-gray me-2" onclick="resetFilters()">Reset</button>
+                    <a asp-action="Create" class="btn-solid-green">Register New Reading</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-container table-wrapper mb-5">
+            <table class="table-custom" id="readingsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Location</th>
+                        <th>Previous</th>
+                        <th>Current</th>
+                        <th style="width: 250px;">Notes</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int count = 0;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        count++;
+                        string rowClass = count > 5 ? "extra-row d-none-custom reading-row" : "reading-row";
+                        string noteText = item.Notes ?? "";
+
+                        <tr class="@rowClass" data-date="@item.ReadingDate.ToString("yyyy-MM-dd")" id="row-@item.ReadingId">
+                            <td>@item.ReadingDate.ToString("yyyy-MM-dd")</td>
+                            <td class="searchable">@(item.Meter?.Customer?.FirstName) @(item.Meter?.Customer?.LastName)</td>
+                            <td class="searchable">@item.Meter?.Location</td>
+                            <td>@item.PreviousReading</td>
+                            <td style="font-weight: 600;">@item.CurrentReading</td>
+
+                            <td>
+                                <span id="note-display-@item.ReadingId" class="note-text"
+                                      style="font-weight: bold;">
+                                    @(string.IsNullOrEmpty(noteText) ? "-" : noteText)
+                                </span>
+
+                                <input type="text" id="note-input-@item.ReadingId" class="input-dark d-none-custom" value="@noteText" />
+                            </td>
+
+                            <td class="text-end">
+                                <button id="btn-edit-@item.ReadingId" class="btn-solid-blue me-1" onclick="enableEdit(@item.ReadingId)">
+                                     Edit
+                                </button>
+
+                                <button id="btn-save-@item.ReadingId" class="btn-solid-green d-none-custom" onclick="saveNote(@item.ReadingId)">
+                                    <i class="bi bi-check-lg"></i> Save
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (totalReadings > 5)
+            {
+                <div class="show-more-wrapper"><button id="toggleBtn" class="show-more-btn" onclick="toggleRows()">Show More</button></div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+  
+    function enableEdit(id) {
+        document.getElementById(`note-display-${id}`).classList.add('d-none-custom');
+        document.getElementById(`note-input-${id}`).classList.remove('d-none-custom');
+        document.getElementById(`btn-edit-${id}`).classList.add('d-none-custom');
+        document.getElementById(`btn-save-${id}`).classList.remove('d-none-custom');
+
+        document.getElementById(`note-input-${id}`).focus();
+    }
+
+    function saveNote(id) {
+        var newNote = document.getElementById(`note-input-${id}`).value;
+        var btnSave = document.getElementById(`btn-save-${id}`);
+
+        var originalText = btnSave.innerHTML;
+        btnSave.innerHTML = '...';
+        btnSave.disabled = true;
+
+        fetch(`/MeterReadings/UpdateNote?id=${id}&note=${encodeURIComponent(newNote)}`, {
+            method: 'POST'
+        })
+        .then(response => {
+            if (response.ok) {
+                var displaySpan = document.getElementById(`note-display-${id}`);
+
+                
+                displaySpan.innerText = newNote;
+
+                displaySpan.classList.remove('d-none-custom');
+                document.getElementById(`note-input-${id}`).classList.add('d-none-custom');
+                document.getElementById(`btn-edit-${id}`).classList.remove('d-none-custom');
+                btnSave.classList.add('d-none-custom');
+            } else {
+                alert("Failed to save note.");
+            }
+        })
+        .catch(err => console.error(err))
+        .finally(() => {
+            btnSave.innerHTML = originalText;
+            btnSave.disabled = false;
+        });
+    }
+
+   
+    function applyFilters() {
+        var filter = document.getElementById("searchInput").value.toUpperCase();
+        var startDate = document.getElementById("startDate").value;
+        var endDate = document.getElementById("endDate").value;
+        var start = startDate ? new Date(startDate) : null;
+        var end = endDate ? new Date(endDate) : null;
+
+        var rows = document.querySelectorAll(".reading-row");
+        rows.forEach(row => {
+            var cust = row.querySelector(".searchable").innerText.toUpperCase();
+            var loc = row.querySelectorAll(".searchable")[1].innerText.toUpperCase();
+            var date = new Date(row.getAttribute("data-date"));
+
+            var matchSearch = cust.includes(filter) || loc.includes(filter);
+            var matchDate = (!start || date >= start) && (!end || date <= end);
+
+            if (matchSearch && matchDate) {
+                row.style.display = "";
+                row.classList.remove("d-none-custom");
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    function resetFilters() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+
+        var allRows = document.querySelectorAll('.reading-row');
+        allRows.forEach(row => row.style.display = "");
+
+        var extraRows = document.querySelectorAll('.extra-row');
+        var btn = document.getElementById('toggleBtn');
+        if(btn) {
+            btn.innerText = "Show More";
+            extraRows.forEach(row => row.classList.add('d-none-custom'));
+        }
+    }
+
+    document.getElementById("searchInput").addEventListener("keyup", applyFilters);
+
+    function toggleRows() {
+        var extraRows = document.querySelectorAll('.extra-row');
+        var btn = document.getElementById('toggleBtn');
+        var isExpanded = btn.innerText === "Show Less";
+
+        document.getElementById("searchInput").value = "";
+        applyFilters();
+
+        if (isExpanded) {
+            extraRows.forEach(row => row.classList.add('d-none-custom'));
+            btn.innerText = "Show More";
+        } else {
+            extraRows.forEach(row => row.classList.remove('d-none-custom'));
+            btn.innerText = "Show Less";
+        }
+    }
+</script>
