@@ -1,0 +1,179 @@
+﻿@model UtilityManagementSystem.ViewModels.BillListViewModel
+@{
+    ViewData["Title"] = "Defaulters List";
+}
+
+<style>
+    /* ===== 1. THEME VARIABLES (Exactly matching your Billing History) ===== */
+    [data-bs-theme="dark"], :root {
+        --bg-main: #16191c;
+        --bg-card: #212529;
+        --bg-alt: #262a2e; /* Slightly lighter than card bg for alternating rows */
+        --bg-header-bar: #1c1f22;
+        --text-main: #ffffff;
+        --border-color: #323844;
+        --input-bg: #16191c;
+        --row-hover: #2a2f36;
+        --table-header-bg: #ffffff;
+        --table-header-text: #000000;
+    }
+
+    /* Light Theme Overrides */
+    [data-bs-theme="light"] {
+        --bg-main: #f8f9fa;
+        --bg-card: #ffffff;
+        --bg-alt: #f1f3f5; /* Slightly darker/greyer than white for alternating rows */
+        --bg-header-bar: #f1f3f5;
+        --text-main: #212529;
+        --border-color: #dee2e6;
+        --input-bg: #ffffff;
+        --row-hover: #e9ecef;
+        --table-header-bg: #ffffff;
+        --table-header-text: #000000;
+    }
+
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    /* ===== 2. TABLE CARD STYLES ===== */
+    .table-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 750px;
+    }
+
+        .table-custom thead tr {
+            background-color: var(--bg-alt) !important;
+        }
+
+        .table-custom th {
+            color: var(--text-main) !important;
+            padding: 15px; /* Matched to your td padding for alignment */
+            font-size: 14px;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-custom td {
+            padding: 15px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        /* Alternating Row Colors */
+        .table-custom tbody tr:nth-child(even) {
+            background-color: var(--bg-alt);
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: var(--row-hover) !important; /* Important to override zebra striping */
+        }
+
+         
+    /* ===== 3. STATUS & BUTTONS ===== */
+    .status-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        background: rgba(241, 65, 108, 0.15); /* Reddish tint for defaulters */
+        color: #ef4444;
+    }
+
+    .btn-view {
+        background-color: #056ee9;
+        color: white;
+        padding: 6px 18px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+
+    .btn-view:hover {
+        background-color: #056ef9;
+        color: white;
+    }
+</style>
+
+<div class="container-fluid py-3">
+    <div class="page-header">
+        <h2 class="fw-bold m-0">
+            Defaulters List
+        </h2>
+        <a asp-action="Index" class="btn btn-primary btn-sm px-3 py-1">
+            Back to All Bills
+        </a>
+    </div>
+
+    @if (!Model.DefaulterList.Any())
+    {
+        <div class="table-card p-5 text-center text-muted">
+            No defaulters found in the system.
+        </div>
+    }
+    else
+    {
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Bill ID</th>
+                            <th>Customer Name</th>
+                            <th>Due Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.DefaulterList)
+                        {
+                            <tr>
+                                <td class="fw-bold text-muted">#@item.BillID</td>
+                                <td class="fw-semibold">@item.CustomerName</td>
+                                <td>@item.DueDate.ToString("dd MMM yyyy")</td>
+                                <td>Rs. @item.TotalAmount.ToString("N2")</td>
+                                <td>
+                                    <span class="status-badge">
+                                        @(item.Status ?? "Unpaid")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@item.BillID" class="btn btn-primary btn-sm px-3 py-1">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

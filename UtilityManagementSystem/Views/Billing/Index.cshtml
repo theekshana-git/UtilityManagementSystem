@@ -1,6 +1,223 @@
-﻿@{
-    ViewData["Title"] = "Bills";
+﻿@model IEnumerable<UtilityManagementSystem.ViewModels.BillListViewModel>
+@{
+    ViewData["Title"] = "Billing History";
 }
 
-<h1>Bills</h1>
-<p>Placeholder view</p>
+<style>
+    /* ===== 1. THEME VARIABLES ===== */
+    [data-bs-theme="dark"], :root {
+        --bg-main: #16191c;
+        --bg-card: #212529;
+        --bg-alt: #262a2e;
+        --bg-header-bar: #1c1f22;
+        --text-main: #ffffff;
+        --border-color: #323844;
+        --input-bg: #16191c;
+        --row-hover: #2a2f36;
+        --table-header-bg: #ffffff;
+        --table-header-text: #000000;
+    }
+
+    [data-bs-theme="light"] {
+        --bg-main: #f8f9fa;
+        --bg-card: #ffffff;
+        --bg-alt: #f1f3f5;
+        --bg-header-bar: #f1f3f5;
+        --text-main: #212529;
+        --border-color: #dee2e6;
+        --input-bg: #ffffff;
+        --row-hover: #e9ecef;
+        --table-header-bg: #ffffff;
+        --table-header-text: #000000;
+    }
+
+    /* ===== 2. CORE STYLES ===== */
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    .page-header {
+        margin-bottom: 20px;
+    }
+
+    .filter-bar {
+        background: var(--bg-card);
+        padding: 15px;
+        border-radius: 8px;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+        flex-wrap: wrap;
+        align-items: center; /* Ensures buttons and inputs align vertically */
+    }
+
+    .form-control-custom {
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 8px 12px;
+        border-radius: 4px;
+        flex: 1 1 200px;
+    }
+
+    /* ===== 3. TABLE CARD STYLES ===== */
+    .table-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 750px;
+    }
+
+        .table-custom thead tr {
+            background-color: var(--bg-alt) !important;
+        }
+
+        .table-custom th {
+            color: var(--text-main) !important;
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-custom td {
+            padding: 15px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .table-custom tbody tr:nth-child(even) {
+            background-color: var(--bg-alt);
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: var(--row-hover) !important;
+        }
+
+    /* Status Badges */
+    .badge-status {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-Paid {
+        background: rgba(34,197,94,0.2);
+        color: #22c55e;
+    }
+
+    .status-Unpaid {
+        background: rgba(239,68,68,0.2);
+        color: #ef4444;
+    }
+
+    /* Show More Styling */
+    .show-more-container {
+        text-align: center;
+        padding: 15px;
+        background-color: var(--bg-card);
+    }
+
+    .show-more-link {
+        color: #3b82f6;
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .hidden-row {
+        display: none;
+    }
+
+</style>
+
+<div class="container-fluid py-3">
+    <div class="page-header">
+        <h2 class="fw-bold m-0">Billing History</h2>
+    </div>
+
+    <form asp-action="Index" method="get" class="filter-bar">
+        <input type="text" name="search" class="form-control-custom" placeholder="Search Customer..." value="@ViewBag.CurrentSearch" />
+        <select name="status" class="form-control-custom" style="flex: 0 1 150px;">
+            <option value="All">All Status</option>
+            <option value="Paid" selected="@(ViewBag.CurrentStatus?.ToString() == "Paid")">Paid</option>
+            <option value="Unpaid" selected="@(ViewBag.CurrentStatus?.ToString() == "Unpaid")">Unpaid</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm px-4">Filter</button>
+
+        <a asp-action="Create" class="btn btn-success btn-sm px-3">Generate Bill</a>
+        <a asp-action="Defaulters" class="btn btn-danger btn-sm px-3">View Defaulters</a>
+    </form>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table-custom" id="billingTable">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        var index = 0;
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(index >= 5 ? "hidden-row" : "")">
+                                <td class="fw-semibold">@(item.CustomerName ?? "N/A")</td>
+                                <td>Rs. @item.TotalAmount.ToString("N2")</td>
+                                <td>@item.BillDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <span class="badge-status status-@(item.Status ?? "Unpaid")">
+                                        @(item.Status ?? "Unpaid")
+                                    </span>
+                                </td>
+                                <td style="text-align:right;">
+                                    <a asp-action="Details" asp-route-id="@(item.BillID)" class="btn btn-primary btn-sm px-3 py-1" style="font-size: 12px;">View</a>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model != null && Model.Count() > 5)
+        {
+            <div class="show-more-container" id="showMoreWrapper">
+                <span class="show-more-link" onclick="showAllRows()">Show More</span>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function showAllRows() {
+        const rows = document.querySelectorAll('.hidden-row');
+        rows.forEach(row => {
+            row.classList.remove('hidden-row');
+        });
+        document.getElementById('showMoreWrapper').style.display = 'none';
+    }
+</script>

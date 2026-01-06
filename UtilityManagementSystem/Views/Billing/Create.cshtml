@@ -1,5 +1,204 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model UtilityManagementSystem.ViewModels.GenerateBillViewModel
 @{
+    ViewData["Title"] = "Generate Bill";
+}
+
+<style>
+    /* ===== 1. THEME VARIABLES (Based on your Bootstrap toggle) ===== */
+    [data-bs-theme="dark"], :root {
+        --bg-main: #16191c;
+        --text-main: #ffffff;
+        --text-muted: #b5bcc9;
+        --input-bg: #212529;
+        --input-border: #323844;
+        --btn-blue: #0d6efd;
+        --btn-blue-hover: #0b5ed7;
+    }
+
+    [data-bs-theme="light"] {
+        --bg-main: #f8f9fa;
+        --text-main: #212529;
+        --text-muted: #6c757d;
+        --input-bg: #ffffff;
+        --input-border: #dee2e6;
+    }
+
+    /* ===== 2. LAYOUT STYLES (Aligned Left like Reference) ===== */
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+        transition: background-color 0.2s ease;
+        
+    }
+
+    .form-container-left {
+        max-width: 600px; /* Aligned left, not centered */
+        margin-top: 20px;
+    }
+
+    .form-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 24px;
+        color: var(--text-main);
+    }
+
+    /* ===== 3. FORM ELEMENTS (Matching Image Styling) ===== */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-main);
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .input-custom {
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-main);
+        padding: 12px 16px;
+        width: 100%;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        /* Reference image shows a distinct blue border on focus */
+        .input-custom:focus {
+            outline: none;
+            border-color: var(--btn-blue);
+            box-shadow: 0 0 0 1px var(--btn-blue);
+        }
+
+        .input-custom:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    /* ===== 4. BLUE ACTION BUTTON (Exact Match) ===== */
+    .btn-submit-blue {
+        width: 100%;
+        background-color: var(--btn-blue);
+        color: #ffffff;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-top: 10px;
+    }
+
+        .btn-submit-blue:hover:not(:disabled) {
+            background-color: var(--btn-blue-hover);
+        }
+
+        .btn-submit-blue:disabled {
+            background-color: #0d6efd;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+        .back-link:hover {
+            color: var(--text-main);
+            text-decoration: underline;
+        }
+</style>
+
+<div class="container-fluid">
+    <div class="form-container-left">
+        <h1 class="form-title">Generate Bill</h1>
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label>Customer</label>
+                <select id="customerDrop" class="input-custom" asp-items="ViewBag.Customers">
+                    <option value="">-- Choose Customer --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Meter</label>
+                <select id="meterDrop" class="input-custom" disabled>
+                    <option value="">-- Select Customer First --</option>
+                </select>
+            </div>
+
+            <input type="hidden" asp-for="ReadingID" id="hiddenReadingID" />
+
+            <button type="submit" id="submitBtn" class="btn-submit-blue" disabled>
+                Process & Generate Bill
+            </button>
+
+            <a asp-action="Index" class="back-link">&larr; Back to History</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#customerDrop').change(function () {
+                var customerId = $(this).val();
+                var meterDrop = $('#meterDrop');
+                resetForm();
+
+                if (customerId) {
+                    $.getJSON('@Url.Action("GetMetersByCustomer", "Billing")',
+                        { customerId: customerId },
+                        function (data) {
+                            meterDrop.empty().append('<option value="">-- Choose Meter --</option>');
+                            $.each(data, function (i, item) {
+                                meterDrop.append($('<option>', {
+                                    value: item.value,
+                                    text: item.text
+                                }));
+                            });
+                            meterDrop.prop('disabled', false);
+                        });
+                }
+            });
+
+            $('#meterDrop').change(function () {
+                var meterId = $(this).val();
+                if (meterId) {
+                    $.getJSON('@Url.Action("GetUnbilledReading", "Billing")',
+                        { meterId: meterId },
+                        function (data) {
+                            if (data && data.readingId) {
+                                $('#hiddenReadingID').val(data.readingId);
+                                $('#submitBtn').prop('disabled', false);
+                            } else {
+                                alert("This meter has no unbilled readings.");
+                                resetForm();
+                            }
+                        });
+                } else {
+                    resetForm();
+                }
+            });
+
+            function resetForm() {
+                $('#hiddenReadingID').val('');
+                $('#submitBtn').prop('disabled', true);
+            }
+        });
+    </script>
 }

@@ -1,5 +1,111 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model UtilityManagementSystem.ViewModels.BillDetailsViewModel
 @{
+    ViewData["Title"] = "Bill Details";
 }
+
+<style>
+    .invoice-box {
+        max-width: 800px;
+        margin: 20px auto;
+        border: 1px solid rgba(255,255,255,0.5);
+        padding: 40px;
+        border-radius: 10px;
+    }
+
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid white;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 5px;
+    }
+
+    .total-row {
+        border-top: 2px solid white;
+        margin-top: 20px;
+        padding-top: 15px;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .status-badge {
+        padding: 5px 15px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 20px;
+    }
+        .status-Paid {
+        background: rgba(34,197,94,0.2);
+        color: #22c55e;
+    }
+
+    .status-Unpaid {
+        background: rgba(239,68,68,0.2);
+        color: #ef4444;
+    }
+
+</style>
+
+<div class="invoice-box">
+    <div class="header-row">
+        <div>
+            <h2>INVOICE</h2>
+            <div style="color:#a1a5b7;">#@Model.BillID</div>
+        </div>
+        <div style="text-align:right;">
+            <div class="status-badge">@Model.Status</div>
+            <div style="margin-top:5px;">Date: @Model.BillDate.ToString("yyyy-MM-dd")</div>
+        </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; margin-bottom:40px;">
+        <div>
+            <h5 style="color:#009ef7;">Bill To:</h5>
+            <strong>@Model.CustomerName</strong><br>
+            @Model.Address, @Model.City<br>
+            @Model.ContactNumber<br>
+            @Model.Email
+        </div>
+        <div style="text-align:right;">
+            <h5 style="color:#009ef7;">Reading Details:</h5>
+            Reading ID: @Model.ReadingID<br>
+            Date: @Model.ReadingDate.ToString("yyyy-MM-dd")<br>
+            <strong>Due Date: @Model.DueDate.ToString("yyyy-MM-dd")</strong>
+        </div>
+    </div>
+
+    <div class="detail-row">
+        <span>Units Consumed</span>
+        <span>@Model.UnitsConsumed</span>
+    </div>
+
+    <div class="detail-row">
+        <span>Base Amount</span>
+        <span>Rs. @Model.TotalAmount.ToString("N2")</span>
+    </div>
+
+    @if (Model.LateFee > 0)
+    {
+        <div class="detail-row" style="color: #ef4444; font-weight: bold;">
+            <span>Late Fee (5% Overdue)</span>
+            <span>Rs. @Model.LateFee.ToString("N2")</span>
+        </div>
+    }
+
+    <div class="detail-row total-row">
+        <span>TOTAL PAYABLE</span>
+        <span>Rs. @((Model.TotalAmount + Model.LateFee).ToString("N2"))</span>
+    </div>
+
+    <div style="margin-top:30px; text-align:center;">
+        <button onclick="window.print()" class="btn-action" style="background:#009ef7; cursor:pointer;">Print Invoice</button>
+        <a asp-action="Index" style="color:#a1a5b7; margin-left:20px;">Back</a>
+    </div>
+</div>

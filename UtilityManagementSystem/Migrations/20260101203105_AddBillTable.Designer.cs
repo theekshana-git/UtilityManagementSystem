@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UtilityManagementSystem.Models;
 
@@ -11,9 +12,11 @@ using UtilityManagementSystem.Models;
 namespace UtilityManagementSystem.Migrations
 {
     [DbContext(typeof(UtilityDbContext))]
-    partial class UtilityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260101203105_AddBillTable")]
+    partial class AddBillTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

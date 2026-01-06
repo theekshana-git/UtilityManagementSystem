@@ -1,5 +1,64 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model UtilityManagementSystem.ViewModels.BillListViewModel
 @{
+    ViewData["Title"] = "Update Bill Status";
 }
+
+<style>
+    .edit-card {
+        max-width: 500px;
+        margin: 50px auto;
+        border: 1px solid rgba(255,255,255,0.5);
+        padding: 40px;
+        border-radius: 10px;
+    }
+
+    .input-dark {
+        background: transparent;
+        border: 1px solid #2b2b40;
+        color: white;
+        padding: 12px;
+        width: 100%;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+
+    .btn-save {
+        width: 100%;
+        padding: 14px;
+        background: #50cd89;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-top: 25px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
+
+<div class="edit-card">
+    <h3 style="font-weight:bold; text-align:center;">Update Bill #@Model.BillID</h3>
+    <hr style="border:0.5px solid rgba(255,255,255,0.1); margin:20px 0;">
+
+    <form asp-action="Edit">
+        <input type="hidden" asp-for="BillID" />
+
+        <div style="margin-bottom:20px;">
+            <label style="color:#a1a5b7;">Customer</label>
+            <input type="text" class="input-dark" value="@Model.CustomerName" readonly />
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label style="color:#a1a5b7;">Payment Status</label>
+            <select asp-for="Status" class="input-dark">
+                <option value="Unpaid">Unpaid</option>
+                <option value="Paid">Paid</option>
+                <option value="Overdue">Overdue</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-save">Save Status Changes</button>
+        <div style="text-align:center; margin-top:20px;">
+            <a asp-action="Index" style="color:#a1a5b7; text-decoration:none;">Cancel</a>
+        </div>
+    </form>
+</div>
