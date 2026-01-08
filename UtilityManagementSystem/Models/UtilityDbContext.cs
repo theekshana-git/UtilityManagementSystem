@@ -50,7 +50,7 @@ public partial class UtilityDbContext : IdentityDbContext<IdentityUser>
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-0RKQMSR;Database=UtilityManagementSystem;Trusted_Connection=True;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Server=DESKTOP-NID96F5\\SQLEXPRESS;Database=UtilityManagementSystem;Trusted_Connection=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -388,13 +388,9 @@ public partial class UtilityDbContext : IdentityDbContext<IdentityUser>
             entity.Property(e => e.UtilityId).HasColumnName("UtilityID");
         });
 
-        modelBuilder.Entity<VwMonthlyRevenue>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToView("vw_MonthlyRevenue");
-
-            entity.Property(e => e.TotalRevenue).HasColumnType("decimal(38, 2)");
+        modelBuilder.Entity<VwMonthlyRevenue>(entity => {
+            entity.HasNoKey();
+            entity.ToView("vw_MonthlyRevenue");
         });
 
         modelBuilder.Entity<VwTopConsumer>(entity =>

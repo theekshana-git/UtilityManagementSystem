@@ -32,7 +32,6 @@ builder.Services.AddScoped<IComplaintsService, ComplaintsService>();
 builder.Services.AddScoped<IMeterReadingsService, MeterReadingsService>();
 builder.Services.AddScoped<ITariffsService, TariffsService>();
 
-
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 

@@ -1,3 +1,4 @@
+USE UtilityManagementSystem;
 CREATE TABLE Customer (
     CustomerID INT IDENTITY(1,1) CONSTRAINT PK_Customer PRIMARY KEY,
     FirstName VARCHAR(50) NOT NULL,

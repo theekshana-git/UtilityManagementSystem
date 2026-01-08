@@ -1,0 +1,48 @@
+﻿@model UtilityManagementSystem.ViewModels.ReportViewModel
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">Revenue Report</h2>
+
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 p-3" style="border-radius: 15px;">
+                <div class="card-body">
+                    <form asp-controller="Reports" asp-action="MonthlyRevenue" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Select Year</label>
+                            <input asp-for="Year" class="form-control" type="number" min="2000" max="2100" required />
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Select Month</label>
+                            <select asp-for="Month" class="form-select">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i">@System.Globalization.DateTimeFormatInfo.CurrentInfo.GetMonthName(i)</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm">Calculate Revenue</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            @if (Model.Revenue.HasValue)
+            {
+                <div class="card border-0 shadow-sm h-100 text-center d-flex justify-content-center" style="background: linear-gradient(135deg, #198754 0%, #146c43 100%); color: white; border-radius: 15px;">
+                    <div class="card-body p-5">
+                        <p class="mb-1 text-uppercase small opacity-75">Total Revenue for @System.Globalization.DateTimeFormatInfo.CurrentInfo.GetMonthName(Model.Month) @Model.Year</p>
+                        <h1 class="display-2 fw-bold">LKR @Model.Revenue.Value.ToString("N2")</h1>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="h-100 border rounded d-flex align-items-center justify-content-center text-muted p-5 bg-light">
+                    Select a month and year to view revenue data.
+                </div>
+            }
+        </div>
+    </div>
+</div>
