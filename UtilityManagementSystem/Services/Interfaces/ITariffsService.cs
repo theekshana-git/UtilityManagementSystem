@@ -4,7 +4,7 @@ using UtilityManagementSystem.ViewModels;
 
 namespace UtilityManagementSystem.Services.Interfaces
 {
-    public interface ITariffService
+    public interface ITariffsService
     {
         IEnumerable<TariffViewModel> GetCurrentTariffs();
         IEnumerable<TariffViewModel> GetTariffHistory(int utilityId);

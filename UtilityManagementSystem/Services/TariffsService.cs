@@ -2,11 +2,11 @@
 using UtilityManagementSystem.Services.Interfaces;
 using UtilityManagementSystem.ViewModels;
 
-public class TariffService : ITariffService
+public class TariffsService : ITariffsService
 {
     private readonly UtilityDbContext _context;
 
-    public TariffService(UtilityDbContext context)
+    public TariffsService(UtilityDbContext context)
     {
         _context = context;
     }
@@ -17,9 +17,7 @@ public class TariffService : ITariffService
     }
 
 
-    // =========================
-    // ADD TARIFF (BUSINESS RULE)
-    // =========================
+    //Add Tarrif
     public void AddTariff(TariffViewModel model)
     {
         var effectiveFrom = DateOnly.FromDateTime(model.EffectiveFrom);
@@ -61,13 +59,12 @@ public class TariffService : ITariffService
         _context.SaveChanges();
     }
 
-    // =========================
-    // CURRENT TARIFFS
-    // =========================
+    //current tariffs
     public IEnumerable<TariffViewModel> GetCurrentTariffs()
     {
         return _context.Tariffs
             .Where(t => t.EffectiveTo == null)
+            .OrderByDescending(t => t.EffectiveFrom)
             .Select(t => new TariffViewModel
             {
                 TariffId = t.TariffId,
@@ -82,14 +79,12 @@ public class TariffService : ITariffService
             .ToList();
     }
 
-    // =========================
-    // TARIFF HISTORY
-    // =========================
+  //tariff history
     public IEnumerable<TariffViewModel> GetTariffHistory(int utilityId)
     {
         return _context.Tariffs
             .Where(t => t.UtilityId == utilityId && t.EffectiveTo != null)
-            .OrderByDescending(t => t.EffectiveFrom)
+            .OrderByDescending(h => h.EffectiveFrom)
             .Select(t => new TariffViewModel
             {
                 UtilityName = t.Utility.UtilityName,

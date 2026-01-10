@@ -5,9 +5,9 @@ using UtilityManagementSystem.ViewModels;
 
 public class TariffsController : Controller
 {
-    private readonly ITariffService _service;
+    private readonly ITariffsService _service;
 
-    public TariffsController(ITariffService service)
+    public TariffsController(ITariffsService service)
     {
         _service = service;
     }
