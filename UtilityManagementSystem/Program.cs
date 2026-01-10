@@ -30,12 +30,21 @@ builder.Services.AddScoped<IPaymentsService, PaymentsService>();
 builder.Services.AddScoped<IReportsService, ReportsService>();
 builder.Services.AddScoped<IComplaintsService, ComplaintsService>();
 builder.Services.AddScoped<IMeterReadingsService, MeterReadingsService>();
-builder.Services.AddScoped<ITariffsService, TariffsService>();
-
-
+builder.Services.AddScoped<ITariffService, TariffService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Users/AccessDenied";
+});
 
 var app = builder.Build();
 
@@ -52,7 +61,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -69,8 +78,10 @@ using (var scope = app.Services.CreateScope())
 }
 
 
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
+

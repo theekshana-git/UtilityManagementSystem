@@ -1,5 +1,27 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model UtilityManagementSystem.ViewModels.UsersEditViewModel
+
+<h2>Edit Employee</h2>
+
+<form asp-action="Edit" method="post" class="w-50">
+    <input type="hidden" asp-for="EmployeeId" />
+
+    <select asp-for="Role" class="form-select mb-2">
+        <option>Admin</option>
+        <option>Manager</option>
+        <option>Cashier</option>
+        <option>Field Officer</option>
+    </select>
+    <span asp-validation-for="Role" class="text-danger"></span>
+
+    <select asp-for="Status" class="form-select mb-2">
+        <option>Active</option>
+        <option>Inactive</option>
+    </select>
+    <span asp-validation-for="Status" class="text-danger"></span>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

@@ -1,5 +1,46 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model UtilityManagementSystem.ViewModels.UsersViewModel
+
+<h2>Create Employee</h2>
+
+<form asp-action="Create" method="post" class="w-50">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <input asp-for="FirstName" class="form-control mb-2" placeholder="First Name" />
+    <span asp-validation-for="FirstName" class="text-danger"></span>
+
+    <input asp-for="LastName" class="form-control mb-2" placeholder="Last Name" />
+    <span asp-validation-for="LastName" class="text-danger"></span>
+
+    <input asp-for="Username" class="form-control mb-2" placeholder="Username" />
+    <span asp-validation-for="Username" class="text-danger"></span>
+
+    <input asp-for="Password" type="password" class="form-control mb-2" placeholder="Password" />
+    <span asp-validation-for="Password" class="text-danger"></span>
+
+    <select asp-for="Role" class="form-select mb-2">
+        <option value="">-- Select Role --</option>
+        <option>Admin</option>
+        <option>Manager</option>
+        <option>Cashier</option>
+        <option>Field Officer</option>
+    </select>
+    <span asp-validation-for="Role" class="text-danger"></span>
+
+    <input asp-for="ContactNumber" class="form-control mb-2" placeholder="Contact Number" />
+    <span asp-validation-for="ContactNumber" class="text-danger"></span>
+
+    <input asp-for="Email" class="form-control mb-2" placeholder="Email" />
+    <span asp-validation-for="Email" class="text-danger"></span>
+
+    <!-- IMPORTANT: Status is REQUIRED -->
+    <input type="hidden" asp-for="Status" value="Active" />
+
+    <button type="submit" class="btn btn-success mt-2">Save</button>
+    <a asp-action="Index" class="btn btn-secondary mt-2">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

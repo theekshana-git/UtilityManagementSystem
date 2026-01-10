@@ -1,6 +1,13 @@
-﻿namespace UtilityManagementSystem.Services.Interfaces
+﻿using UtilityManagementSystem.ViewModels;
+
+namespace UtilityManagementSystem.Services.Interfaces
 {
-    public class IUsersService
+    public interface IUsersService
     {
+        IEnumerable<UsersViewModel> GetAll();
+        UsersViewModel GetById(int id);
+        void Create(UsersViewModel model);
+        void UpdateRoleStatus(UsersEditViewModel model);
+
     }
 }
