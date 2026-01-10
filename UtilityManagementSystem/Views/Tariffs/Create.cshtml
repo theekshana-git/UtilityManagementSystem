@@ -1,5 +1,64 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model UtilityManagementSystem.ViewModels.TariffViewModel
+
+
+<h2>Add Tariff</h2>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3 w-50">
+        <label asp-for="UtilityId" class="form-label"></label>
+        <select asp-for="UtilityId"
+                asp-items="ViewBag.Utilities"
+                class="form-select">
+            <option value="">-- Select Utility --</option>
+        </select>
+        <span asp-validation-for="UtilityId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 w-50">
+        <label asp-for="SlabStart"></label>
+        <input asp-for="SlabStart" class="form-control" />
+        <span asp-validation-for="SlabStart" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 w-50">
+        <label asp-for="SlabEnd"></label>
+        <input asp-for="SlabEnd" class="form-control" />
+        <span asp-validation-for="SlabEnd" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 w-50">
+        <label asp-for="FixedCharge"></label>
+        <input asp-for="FixedCharge" class="form-control" />
+        <span asp-validation-for="FixedCharge" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 w-50">
+        <label asp-for="RatePerUnit"></label>
+        <input asp-for="RatePerUnit" class="form-control" />
+        <span asp-validation-for="RatePerUnit" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 w-50">
+        <label asp-for="EffectiveFrom"></label>
+        <input asp-for="EffectiveFrom" type="date" class="form-control" />
+        <span asp-validation-for="EffectiveFrom" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 w-50">
+        <label asp-for="EffectiveTo"></label>
+        <input asp-for="EffectiveTo" type="date" class="form-control" />
+        <span asp-validation-for="EffectiveTo" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Create Tariff
+    </button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

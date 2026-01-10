@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using UtilityManagementSystem.ViewModels;
 
 
 namespace UtilityManagementSystem.Models;
@@ -48,9 +49,10 @@ public partial class UtilityDbContext : IdentityDbContext<IdentityUser>
 
     public virtual DbSet<VwUnpaidBill> VwUnpaidBills { get; set; }
 
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-0RKQMSR;Database=UtilityManagementSystem;Trusted_Connection=True;TrustServerCertificate=True");
+       => optionsBuilder.UseSqlServer("Server=LAPTOP-4JL9OA28\\SQLEXPRESS;Database=UtilityManagementSystem;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

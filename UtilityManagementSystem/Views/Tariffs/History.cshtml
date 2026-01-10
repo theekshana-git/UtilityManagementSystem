@@ -1,0 +1,33 @@
+﻿@model IEnumerable<UtilityManagementSystem.ViewModels.TariffViewModel>
+
+<h2>Tariff History</h2>
+
+<table class="table table-dark table-striped">
+    <thead>
+        <tr>
+            <th>Utility</th>
+            <th>Slab Start</th>
+            <th>Slab End</th>
+            <th>Rate Per Unit</th>
+            <th>Effective From</th>
+            <th>Effective To</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.UtilityName</td>
+                <td>@item.SlabStart</td>
+                <td>@item.SlabEnd</td>
+                <td>@item.RatePerUnit</td>
+                <td>@item.EffectiveFrom.ToString("yyyy-MM-dd")</td>
+                <td>
+                    @(item.EffectiveTo.HasValue
+                        ? item.EffectiveTo.Value.ToString("yyyy-MM-dd")
+                        : "Active")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
