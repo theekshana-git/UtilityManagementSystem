@@ -1,0 +1,180 @@
+﻿@model UtilityManagementSystem.ViewModels.ReportViewModel
+
+<style>
+    /* ===============================
+       THEME VARIABLES (LIGHT = DEFAULT)
+    ================================ */
+    :root {
+        --bg-body: #f5f7fa;
+        --text-main: #212529;
+        --card-bg: #ffffff;
+        --card-border: #dee2e6;
+        --input-bg: #ffffff;
+        --input-border: #ced4da;
+        --input-text: #212529;
+        --btn-primary-bg: #0d6efd;
+        --btn-primary-text: #ffffff;
+        --label-text: #6c757d;
+        --back-link: #6c757d;
+        --highlight-text: #dc3545;
+        --divider-color: #dee2e6;
+    }
+
+    /* ===============================
+       DARK MODE VARIABLES
+    ================================ */
+    [data-bs-theme="dark"] {
+        --bg-body: #16191c;
+        --text-main: #ffffff;
+        --card-bg: #212529;
+        --card-border: #323844;
+        --input-bg: #2c3034;
+        --input-border: #495057;
+        --input-text: #ffffff;
+        --btn-primary-bg: #0d6efd;
+        --btn-primary-text: #ffffff;
+        --label-text: #adb5bd;
+        --back-link: #adb5bd;
+        --highlight-text: #f1416c;
+        --divider-color: #495057;
+    }
+
+    /* ===============================
+       BASE LAYOUT
+    ================================ */
+    body {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        font-family: Inter, Helvetica, sans-serif;
+        transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* ===============================
+       INPUT
+    ================================ */
+    .custom-input {
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--input-border) !important;
+        color: var(--input-text) !important;
+        border-radius: 8px;
+    }
+
+    /* ===============================
+       BUTTONS
+    ================================ */
+    .btn-utility-primary {
+        background-color: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: opacity 0.2s;
+    }
+
+        .btn-utility-primary:hover {
+            opacity: 0.9;
+        }
+
+    /* ===============================
+       CARDS
+    ================================ */
+    .custom-card {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+    }
+
+    /* ===============================
+       TEXT & LABELS
+    ================================ */
+    .info-label {
+        color: var(--label-text);
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        color: var(--text-main);
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+
+    .back-link {
+        color: var(--back-link);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+        .back-link:hover {
+            color: var(--text-main);
+        }
+
+    .display-highlight {
+        color: var(--highlight-text);
+    }
+
+    hr.divider {
+        border-color: var(--divider-color);
+    }
+</style>
+
+<div class="container py-5">
+    <h2 class="fw-bold mb-4" style="color: var(--text-main);">Customer Usage Summary</h2>
+
+    <div class="row g-4">
+        <div class="col-md-5">
+            <form asp-action="CustomerUsage" method="post" class="card custom-card p-4 shadow">
+                <div class="mb-4">
+                    <label class="form-label fw-bold info-label">Enter Customer ID</label>
+                    <input asp-for="SearchCustomerId" class="form-control custom-input" placeholder="e.g. 101" type="number" required />
+                </div>
+
+                <button type="submit" class="btn-utility-primary w-100 mb-3">Search Customer</button>
+
+                <a asp-action="Index" class="back-link">
+                    <i class="bi bi-arrow-left"></i> &larr; Back to Reports Dashboard
+                </a>
+            </form>
+        </div>
+
+        <div class="col-md-7">
+            @if (Model.UsageSummary != null)
+            {
+                <div class="card custom-card shadow h-100">
+                    <div class="card-header bg-transparent border-secondary py-3">
+                        <h4 class="mb-0 fw-bold" style="color: var(--text-main);">
+                            @Model.UsageSummary.FirstName @Model.UsageSummary.LastName
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <div class="info-label">Total Consumption</div>
+                            <div class="info-value">@Model.UsageSummary.TotalConsumption Units</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="info-label">Total Billed</div>
+                            <div class="info-value">LKR @Model.UsageSummary.TotalBilled.ToString("N2")</div>
+                        </div>
+
+                        <hr class="divider" />
+
+                        <div>
+                            <div class="info-label display-highlight">Outstanding Balance</div>
+                            <div class="display-6 fw-bold display-highlight">
+                                LKR @Model.UsageSummary.OutstandingBalance.ToString("N2")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.HasSearched)
+            {
+                <div class="alert alert-dark border-secondary text-center py-4 rounded-3">
+                    <i class="bi bi-exclamation-circle d-block mb-2 fs-3"></i>
+                    No data found for Customer ID <strong>@Model.SearchCustomerId</strong>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,253 @@
+﻿@model UtilityManagementSystem.ViewModels.ReportViewModel
+
+<style>
+    /* ===============================
+       LIGHT MODE (DEFAULT)
+    ================================ */
+    :root {
+        --bg-body: #f5f8fa;
+        --bg-card: #ffffff;
+        --bg-alt: #f1f3f5;
+        --row-hover: #e9ecef;
+        --table-header-bg: #212529;
+        --table-header-text: #ffffff;
+        --text-main: #212529;
+        --text-muted: #6c757d;
+        --border-color: #dee2e6;
+        --table-row-border: #e5e7eb;
+        --accent-blue: #009ef7;
+        --status-overdue-bg: rgba(241, 65, 108, 0.12);
+        --status-overdue-text: #f1416c;
+    }
+
+    /* ===============================
+       DARK MODE (BOOTSTRAP)
+    ================================ */
+    [data-bs-theme="dark"] {
+        --bg-body: #16191c;
+        --bg-card: #212529;
+        --bg-alt: #262a2e;
+        --row-hover: #2a2f36;
+        --table-header-bg: #ffffff;
+        --table-header-text: #000000;
+        --text-main: #ffffff;
+        --text-muted: #9aa0ac;
+        --border-color: #323844;
+        --table-row-border: #323844;
+    }
+
+    /* ===============================
+       BASE LAYOUT
+    ================================ */
+    body {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        transition: background-color .25s ease, color .25s ease;
+        font-family: Inter, Helvetica, sans-serif;
+    }
+
+    .custom-card {
+        background-color: var(--bg-card);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    /* ===============================
+       TABLE (BOOTSTRAP OVERRIDE)
+    ================================ */
+    .custom-table {
+        background-color: var(--bg-card);
+        color: var(--text-main);
+    }
+
+        /* 🔑 THIS IS THE IMPORTANT PART */
+        .custom-table > :not(caption) > thead > tr > th {
+            background-color: var(--table-header-bg) !important;
+            color: var(--table-header-text) !important;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 1rem 1.5rem;
+        }
+
+        .custom-table tbody tr:nth-child(even) td {
+            background-color: var(--bg-alt);
+        }
+
+        .custom-table tbody tr:hover td {
+            background-color: var(--row-hover);
+        }
+
+        .custom-table tbody td {
+            border-bottom: 1px dashed var(--table-row-border);
+            color: var(--text-main);
+            padding: 1rem 1.5rem;
+        }
+
+    /* ===============================
+       TEXT HELPERS
+    ================================ */
+    .text-main-custom {
+        color: var(--text-main) !important;
+    }
+
+    .text-muted-custom {
+        color: var(--text-muted) !important;
+    }
+
+    /* ===============================
+       STATUS BADGE
+    ================================ */
+    .status-badge {
+        background-color: var(--status-overdue-bg);
+        color: var(--status-overdue-text);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+
+    /* ===============================
+       BUTTONS
+    ================================ */
+    .btn-primary-custom {
+        background-color: var(--accent-blue);
+        color: #fff;
+        border-radius: 6px;
+        padding: 8px 16px;
+        border: none;
+        font-weight: 500;
+    }
+
+    .btn-outline-custom {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        border-radius: 6px;
+        padding: 8px 16px;
+    }
+
+        .btn-outline-custom:hover {
+            background-color: var(--row-hover);
+            color: var(--text-main);
+        }
+
+    /* ===============================
+       SHOW MORE
+    ================================ */
+    .show-more-container {
+        border-top: 1px solid var(--border-color);
+        padding: 1.25rem;
+        text-align: center;
+    }
+
+    .btn-show-more-link {
+        background: none;
+        border: none;
+        color: var(--accent-blue);
+        font-weight: 600;
+    }
+
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1 text-main-custom">Defaulters Report</h3>
+            <p class="text-muted-custom small mb-0">Showing all customers with outstanding balances</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="ExportDefaulters" class="btn-primary-custom">
+                <i class="bi bi-download me-2"></i> Export CSV
+            </a>
+            <a asp-action="Index" class="btn-outline-custom">
+                Back
+            </a>
+        </div>
+    </div>
+
+    <div class="card custom-card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table custom-table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Customer ID</th>
+                            <th>Customer Name</th>
+                            <th class="text-end">Outstanding Balance</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Defaulters != null && Model.Defaulters.Any())
+                        {
+                            int rowCount = 0;
+                            @foreach (var item in Model.Defaulters)
+                            {
+                                rowCount++;
+                                string rowClass = rowCount > 5 ? "extra-row d-none" : "";
+
+                                <tr class="@rowClass">
+                                    <td class="ps-4 text-main-custom">@item.CustomerID</td>
+                                    <td class="text-main-custom">
+                                        <span class="fw-bold">@item.FirstName @item.LastName</span>
+                                    </td>
+                                    <td class="text-end text-danger fw-bold">
+                                        LKR @item.Outstanding.ToString("N2")
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="status-badge">Overdue</span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <div class="text-muted-custom">
+                                        <p class="mb-0">No Defaulters Found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.Defaulters != null && Model.Defaulters.Count > 5)
+            {
+                <div class="show-more-container">
+                    <button onclick="toggleRows(true)" id="btnShowMore" class="btn-show-more-link">
+                        Show More
+                    </button>
+
+                    <button onclick="toggleRows(false)" id="btnShowLess" class="btn-show-more-link d-none">
+                        Show Less
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleRows(show) {
+        var hiddenRows = document.querySelectorAll('.extra-row');
+        var btnMore = document.getElementById('btnShowMore');
+        var btnLess = document.getElementById('btnShowLess');
+
+        if (show) {
+            hiddenRows.forEach(r => r.classList.remove('d-none'));
+            btnMore.classList.add('d-none');
+            btnLess.classList.remove('d-none');
+        } else {
+            hiddenRows.forEach(r => r.classList.add('d-none'));
+            btnMore.classList.remove('d-none');
+            btnLess.classList.add('d-none');
+        }
+    }
+</script>

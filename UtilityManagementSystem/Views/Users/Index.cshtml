@@ -1,6 +1,208 @@
-﻿@{
-    ViewData["Title"] = "Users";
+﻿@model IEnumerable<UtilityManagementSystem.ViewModels.UsersViewModel>
+
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">Employees</h2>
+
+    <!-- Filters -->
+    <div class="card shadow-sm rounded-lg card-hover mb-3"
+         style="border:none;">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap gap-3 align-items-end">
+
+                <!-- Search -->
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Search</label>
+                    <input type="text"
+                           id="searchInput"
+                           class="form-control bg-dark text-light border-secondary"
+                           placeholder="Search employee..." />
+                </div>
+
+                <!-- Role Filter -->
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Role</label>
+                    <select id="roleFilter"
+                            class="form-select bg-dark text-light border-secondary">
+                        <option value="">All</option>
+                        <option value="admin">Admin</option>
+                        <option value="cashier">Cashier</option>
+                        <option value="manager">Manager</option>
+                        <option value="field">Field Officer</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-primary px-4"
+                            onclick="applyFilters()">
+                        Filter
+                    </button>
+
+                    <a asp-action="Create"
+                       class="btn btn-success px-4">
+                        Add Employee
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm rounded-lg card-hover overflow-hidden mb-3"
+         style="border:1px solid var(--bs-border-color);">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        @{
+                            var index = 0;
+                        }
+                        @foreach (var e in Model)
+                        {
+                            <tr data-index="@index">
+                                <td>@e.FirstName @e.LastName</td>
+                                <td>@e.Username</td>
+                                <td>
+                                    <span class="role-badge role-@e.Role?.ToLower().Replace(" ", "")">
+                                        @e.Role
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge @(e.Status == "Active" ? "status-active" : "status-inactive")">
+                                        @e.Status
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit"
+                                       asp-route-id="@e.EmployeeId"
+                                       class="btn btn-sm btn-primary">
+                                        Edit
+                                    </a>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.Count() > 5)
+            {
+                <div class="py-2 text-center">
+                    <a href="javascript:void(0);"
+                       class="btn btn-link"
+                       id="showMoreBtn">
+                        Show More
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card-hover {
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+
+        .card-hover:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 0 0 2px rgba(13,110,253,0.25), 0 8px 20px rgba(0,0,0,0.10);
+        }
+
+
+        .status-badge {
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .status-active {
+            color: #22c55e;
+            background-color: rgba(34,197,94,0.2);
+        }
+
+        .status-inactive {
+            color: #ef4444;
+            background-color: rgba(239,68,68,0.2);
+        }
+    </style>
 }
 
-<h1>Users</h1>
-<p>Placeholder view</p>
+@section Scripts {
+    <script>
+        document.getElementById("searchInput")
+            .addEventListener("keyup", applyFilters);
+
+        document.getElementById("roleFilter")
+            .addEventListener("change", applyFilters);
+
+        function applyFilters() {
+            const searchValue = document
+                .getElementById("searchInput")
+                .value.toLowerCase();
+
+            const roleValue = document
+                .getElementById("roleFilter")
+                .value.toLowerCase();
+
+            document.querySelectorAll("#usersTable tr")
+                .forEach(row => {
+
+                    const rowText = row.innerText.toLowerCase();
+                    const roleText = row
+                        .querySelector("td:nth-child(3)")
+                        .innerText.toLowerCase();
+
+                    const matchesSearch = rowText.includes(searchValue);
+                    const matchesRole = !roleValue || roleText.includes(roleValue);
+
+                    row.style.display =
+                        (matchesSearch && matchesRole) ? "" : "none";
+                });
+        }
+
+        const rows = document.querySelectorAll("#usersTable tr");
+        const showMoreBtn = document.getElementById("showMoreBtn");
+        let expanded = sessionStorage.getItem("usersExpanded") === "true";
+        const LIMIT = 5;
+
+        function applyInitialLimit() {
+            rows.forEach((row, i) => {
+                row.style.display = i < LIMIT ? "" : "none";
+            });
+        }
+
+        if (rows.length > LIMIT) {
+            if (expanded) {
+                rows.forEach(row => row.style.display = "");
+                showMoreBtn.innerText = "Show Less";
+            } else {
+                applyInitialLimit();
+            }
+        }
+
+        showMoreBtn?.addEventListener("click", () => {
+            expanded = !expanded;
+            sessionStorage.setItem("usersExpanded", expanded);
+
+            rows.forEach((row, i) => {
+                row.style.display = expanded || i < LIMIT ? "" : "none";
+            });
+
+            showMoreBtn.innerText = expanded ? "Show Less" : "Show More";
+        });
+    </script>
+}

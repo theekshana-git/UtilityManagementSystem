@@ -1,6 +1,304 @@
-﻿@{
-    ViewData["Title"] = "Meter Readings";
+﻿@model IEnumerable<UtilityManagementSystem.Models.MeterReading>
+
+@{
+    var totalReadings = Model.Count();
+    var avgConsumption = totalReadings > 0
+        ? Math.Round(Model.Average(r => r.Consumption ?? 0), 1)
+        : 0;
+
+    var highUsage = Model.Count(r => (r.Consumption ?? 0) > 100);
+    var thisMonth = Model.Count(r =>
+        r.ReadingDate.Month == DateTime.Now.Month &&
+        r.ReadingDate.Year == DateTime.Now.Year);
 }
 
-<h1>Meter Readings</h1>
-<p>Placeholder view</p>
+<style>
+    /* Base hover effect */
+    .card.card-hover {
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        will-change: transform, box-shadow;
+    }
+
+        .card.card-hover:hover {
+            transform: translateY(-2px);
+        }
+
+    /* Stronger default outline */
+    .card.card-hover {
+        border: 1px solid var(--bs-border-color);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Utility-colored outlines (visible & consistent) */
+    .outline-primary {
+        border-color: var(--bs-primary) !important;
+    }
+
+    .outline-success {
+        border-color: var(--bs-success) !important;
+    }
+
+    .outline-danger {
+        border-color: var(--bs-danger) !important;
+    }
+
+    .outline-warning {
+        border-color: var(--bs-warning) !important;
+    }
+
+    /* Hover glow per utility color (brand-tinted) */
+    .card.card-hover.outline-primary:hover {
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25), 0 8px 20px rgba(0,0,0,0.10);
+    }
+
+    .card.card-hover.outline-success:hover {
+        box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.25), 0 8px 20px rgba(0,0,0,0.10);
+    }
+
+    .card.card-hover.outline-danger:hover {
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25), 0 8px 20px rgba(0,0,0,0.10);
+    }
+
+    .card.card-hover.outline-warning:hover {
+        box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.35), 0 8px 20px rgba(0,0,0,0.10);
+    }
+
+    /* Dark mode tuning: soften base shadow; keep glow readable */
+    [data-bs-theme="dark"] .card.card-hover {
+        box-shadow: 0 1px 4px rgba(0,0,0,0.45);
+    
+</style>
+
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">Meter Readings</h2>
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-3">
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-sm rounded-lg text-center p-3 h-100 card-hover outline-primary">
+                <div class="text-primary mb-2">
+                    <i class="bi bi-list-check" style="font-size:1.8rem;"></i>
+                </div>
+                <div class="text-body-secondary">Total Readings</div>
+                <div class="fs-3 fw-bold metric-num">@totalReadings</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-sm rounded-lg text-center p-3 h-100 card-hover outline-success">
+                <div class="text-success mb-2">
+                    <i class="bi bi-graph-up" style="font-size:1.8rem;"></i>
+                </div>
+                <div class="text-body-secondary">Avg Consumption</div>
+                <div class="fs-3 fw-bold metric-num">@avgConsumption</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-sm rounded-lg text-center p-3 h-100 card-hover outline-danger">
+                <div class="text-danger mb-2">
+                    <i class="bi bi-exclamation-triangle" style="font-size:1.8rem;"></i>
+                </div>
+                <div class="text-body-secondary">High Usage Alerts</div>
+                <div class="fs-3 fw-bold metric-num">@highUsage</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-sm rounded-lg text-center p-3 h-100 card-hover outline-warning">
+                <div class="text-warning mb-2">
+                    <i class="bi bi-calendar-check" style="font-size:1.8rem;"></i>
+                </div>
+                <div class="text-body-secondary">Readings This Month</div>
+                <div class="fs-3 fw-bold metric-num">@thisMonth</div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Filters -->
+    <div class="card shadow-sm rounded-lg card-hover mb-3" style="border:none">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap gap-3 align-items-end">
+
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Customer / Location</label>
+                    <input type="text"
+                           id="searchInput"
+                           class="form-control"
+                           placeholder="Search readings..." />
+                </div>
+
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">From</label>
+                    <input type="date" id="startDate" class="form-control" />
+                </div>
+
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">To</label>
+                    <input type="date" id="endDate" class="form-control" />
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button class="btn btn-primary px-4" onclick="applyFilters()">
+                        Filter
+                    </button>
+
+                    <a class="btn btn-success px-4" asp-action="Create">
+                        Register Reading
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm rounded-lg card-hover overflow-hidden mb-3"
+         style="border:1px solid var(--bs-border-color);">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Location</th>
+                            <th>Previous</th>
+                            <th>Current</th>
+                            <th>Notes</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="readingsTable">
+                        @{
+                            var index = 0;
+                        }
+                        @foreach (var r in Model)
+                        {
+                            <tr data-index="@index" data-date="@r.ReadingDate.ToString("yyyy-MM-dd")">
+                                <td>@r.ReadingDate.ToString("yyyy-MM-dd")</td>
+                                <td>@r.Meter?.Customer?.FirstName @r.Meter?.Customer?.LastName</td>
+                                <td>@r.Meter?.Location</td>
+                                <td>@r.PreviousReading</td>
+                                <td class="fw-semibold">@r.CurrentReading</td>
+                                <td>
+                                    <span id="note-display-@r.ReadingId">
+                                        @(string.IsNullOrEmpty(r.Notes) ? "-" : r.Notes)
+                                    </span>
+                                    <input type="text"
+                                           id="note-input-@r.ReadingId"
+                                           class="form-control d-none"
+                                           value="@r.Notes" />
+                                </td>
+                                <td class="text-center">
+                                    <button id="btn-edit-@r.ReadingId"
+                                            class="btn btn-primary btn-sm"
+                                            onclick="enableEdit(@r.ReadingId)">
+                                        Edit
+                                    </button>
+
+                                    <button id="btn-save-@r.ReadingId"
+                                            class="btn btn-success btn-sm d-none"
+                                            onclick="saveNote(@r.ReadingId)">
+                                        Save
+                                    </button>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.Count() > 5)
+            {
+                <div class="py-2 text-center">
+                    <a href="javascript:void(0);" class="btn btn-link" id="showMoreBtn">
+                        Show More
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+@section Scripts {
+    <script>
+        function enableEdit(id) {
+            document.getElementById(`note-display-${id}`).classList.add("d-none");
+            document.getElementById(`note-input-${id}`).classList.remove("d-none");
+            document.getElementById(`btn-edit-${id}`).classList.add("d-none");
+            document.getElementById(`btn-save-${id}`).classList.remove("d-none");
+        }
+
+        function saveNote(id) {
+            const note = document.getElementById(`note-input-${id}`).value;
+
+            fetch(`/MeterReadings/UpdateNote?id=${id}&note=${encodeURIComponent(note)}`, {
+                method: 'POST'
+            }).then(r => {
+                if (!r.ok) throw "Error";
+
+                document.getElementById(`note-display-${id}`).innerText = note || "-";
+                document.getElementById(`note-display-${id}`).classList.remove("d-none");
+                document.getElementById(`note-input-${id}`).classList.add("d-none");
+                document.getElementById(`btn-edit-${id}`).classList.remove("d-none");
+                document.getElementById(`btn-save-${id}`).classList.add("d-none");
+            });
+        }
+
+        function applyFilters() {
+            const search = document.getElementById("searchInput").value.toLowerCase();
+            const start = document.getElementById("startDate").value;
+            const end = document.getElementById("endDate").value;
+
+            document.querySelectorAll("#readingsTable tr").forEach(row => {
+                const text = row.innerText.toLowerCase();
+                const date = row.dataset.date;
+
+                const matchText = text.includes(search);
+                const matchDate =
+                    (!start || date >= start) &&
+                    (!end || date <= end);
+
+                row.style.display = (matchText && matchDate) ? "" : "none";
+            });
+        }
+
+        const rows = document.querySelectorAll("#readingsTable tr");
+        const showMoreBtn = document.getElementById("showMoreBtn");
+        let expanded = sessionStorage.getItem("readingsExpanded") === "true";
+        const LIMIT = 5;
+
+        function applyInitialLimit() {
+            rows.forEach((row, i) => {
+                row.style.display = i < LIMIT ? "" : "none";
+            });
+        }
+
+        if (rows.length > LIMIT) {
+            if (expanded) {
+                rows.forEach(r => r.style.display = "");
+                showMoreBtn.innerText = "Show Less";
+            } else {
+                applyInitialLimit();
+            }
+        }
+
+        if (showMoreBtn) {
+            showMoreBtn.addEventListener("click", () => {
+                expanded = !expanded;
+                sessionStorage.setItem("readingsExpanded", expanded);
+
+                rows.forEach((row, i) => {
+                    row.style.display = expanded || i < LIMIT ? "" : "none";
+                });
+
+                showMoreBtn.innerText = expanded ? "Show Less" : "Show More";
+            });
+        }
+    </script>
+}

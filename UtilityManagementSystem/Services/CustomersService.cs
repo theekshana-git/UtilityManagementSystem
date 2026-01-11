@@ -85,7 +85,8 @@ namespace UtilityManagementSystem.Services
                     {
                         BillID = b.BillId,
                         Amount = b.TotalAmount,
-                        DueDate = b.BillDate.Value.ToDateTime(TimeOnly.MinValue)
+                        DueDate = b.BillDate.ToDateTime(TimeOnly.MinValue)
+
                     }).ToList(),
 
                 Payments = customer.Payments.Select(p => new PaymentViewModel

@@ -1,0 +1,108 @@
+﻿@model IEnumerable<UtilityManagementSystem.ViewModels.TariffViewModel>
+
+@{
+    ViewData["Title"] = "Tariff History";
+    var first = Model.FirstOrDefault();
+}
+
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">Tariff History</h2>
+
+    @if (first != null)
+    {
+        <p class="text-body-secondary mb-3">
+            <strong>@first.UtilityName</strong> —
+            Slab @first.SlabStart
+            @(first.SlabEnd.HasValue ? $"– {first.SlabEnd}" : "+")
+        </p>
+    }
+
+    <div class="card shadow-sm rounded-lg card-hover overflow-hidden mb-3"
+         style="border:1px solid var(--bs-border-color);">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Rate / Unit</th>
+                            <th>Fixed Charge</th>
+                            <th>Effective From</th>
+                            <th>Effective To</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No tariff history available for this slab.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                var isActive = item.EffectiveTo == null;
+
+                                <tr>
+                                    <td>@item.RatePerUnit</td>
+                                    <td>@item.FixedCharge</td>
+                                    <td>@item.EffectiveFrom.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        @(item.EffectiveTo.HasValue
+                                                                        ? item.EffectiveTo.Value.ToString("yyyy-MM-dd")
+                                                                        : "-")
+                            </td>
+                            <td>
+                                <span class="status-badge @(isActive ? "status-active" : "status-inactive")">
+                                    @(isActive ? "Active" : "Expired")
+                                </span>
+                            </td>
+                        </tr>
+                                                }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <a asp-action="Index" class="btn btn-outline-secondary mt-2">
+        Back to Tariffs
+    </a>
+
+</div>
+
+@section styles {
+    <style>
+        .card-hover {
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            will-change: transform, box-shadow;
+        }
+
+            .card-hover:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0 0 2px rgba(13,110,253,0.25), 0 8px 20px rgba(0,0,0,0.10);
+            }
+
+        .status-badge {
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .status-active {
+            color: #22c55e;
+            background-color: rgba(34,197,94,0.2);
+        }
+
+        .status-inactive {
+            color: #6b7280;
+            background-color: rgba(107,114,128,0.2);
+        }
+    </style>
+}

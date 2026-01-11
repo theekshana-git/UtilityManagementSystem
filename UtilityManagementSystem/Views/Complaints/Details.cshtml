@@ -1,5 +1,50 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model UtilityManagementSystem.ViewModels.ComplaintViewModel
+
 @{
+    ViewData["Title"] = "Complaint Details";
 }
+
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between">
+        <h5>Complaint #@Model.ComplaintId</h5>
+        <span class="badge bg-secondary">@Model.Status</span>
+    </div>
+
+    <div class="card-body">
+        <p><strong>Description</strong></p>
+        <p class="text-muted">@Model.Description</p>
+
+        <hr />
+
+        @if (Model.Status != "Resolved")
+        {
+            <form asp-action="Assign" method="post" class="mb-3">
+                <input type="hidden" name="complaintId" value="@Model.ComplaintId" />
+
+                <label class="form-label">Assign Employee</label>
+                <div class="d-flex gap-2">
+                    <select name="employeeId" class="form-select" asp-items="Model.Employees"></select>
+                    <button class="btn btn-outline-primary">Assign</button>
+                </div>
+            </form>
+
+            <form asp-action="Resolve" method="post">
+                <input type="hidden" name="complaintId" value="@Model.ComplaintId" />
+
+                <label class="form-label">Resolution Note</label>
+                <textarea name="resolutionNote" class="form-control mb-2" rows="3"></textarea>
+
+                <button class="btn btn-success">Mark as Resolved</button>
+            </form>
+        }
+        else
+        {
+            <p><strong>Resolution Note</strong></p>
+            <p class="text-muted">@Model.ResolutionNote</p>
+
+            <p class="text-muted">
+                Resolved on: @Model.ResolutionDate
+            </p>
+        }
+    </div>
+</div>

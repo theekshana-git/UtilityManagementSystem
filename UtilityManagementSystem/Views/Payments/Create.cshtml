@@ -1,5 +1,112 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model UtilityManagementSystem.ViewModels.PaymentsViewModel
+
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">Record Payment</h2>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3 w-50">
+            <label class="form-label text-body-secondary">Unpaid Bill</label>
+            <select asp-for="BillId"
+                    id="billDrop"
+                    class="form-control">
+                <option value="">-- Select Unpaid Bill --</option>
+
+                @foreach (var bill in Model.UnpaidBills)
+                {
+                    <option value="@bill.BillId"
+                            data-outstanding="@bill.TotalAmount">
+                        @bill.FirstName @bill.LastName – Rs. @bill.TotalAmount.ToString("N2")
+                    </option>
+                }
+            </select>
+            <span asp-validation-for="BillId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 w-50">
+            <label class="form-label text-body-secondary">Amount</label>
+            <input asp-for="AmountPaid"
+                   id="amountInput"
+                   class="form-control"
+                   disabled />
+            <span asp-validation-for="AmountPaid" class="text-danger"></span>
+            <span class="text-danger" id="amountError"></span>
+        </div>
+
+        <div class="mb-3 w-50">
+            <label class="form-label text-body-secondary">Payment Method</label>
+            <select asp-for="PaymentMethod" class="form-control">
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="Online">Online</option>
+            </select>
+        </div>
+
+
+        <div class="d-flex gap-2 mt-4 w-50">
+            <button type="submit"
+                    id="submitBtn"
+                    class="btn btn-primary px-4"
+                    disabled>
+                Record Payment
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-link mt-3">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const billDrop = document.getElementById("billDrop");
+        const amountInput = document.getElementById("amountInput");
+        const submitBtn = document.getElementById("submitBtn");
+        const amountError = document.getElementById("amountError");
+
+        let outstanding = 0;
+
+        billDrop.addEventListener("change", function () {
+            const selected = this.options[this.selectedIndex];
+            outstanding = parseFloat(selected.dataset.outstanding || 0);
+
+            if (outstanding > 0) {
+                amountInput.disabled = false;
+                submitBtn.disabled = true;
+                amountInput.value = "";
+                amountError.innerText = "";
+            } else {
+                reset();
+            }
+        });
+
+        amountInput.addEventListener("input", function () {
+            const val = parseFloat(this.value);
+
+            if (!val || val <= 0) {
+                amountError.innerText = "Enter a valid amount.";
+                submitBtn.disabled = true;
+            }
+            else if (val > outstanding) {
+                amountError.innerText = "Amount exceeds outstanding balance.";
+                submitBtn.disabled = true;
+            }
+            else {
+                amountError.innerText = "";
+                submitBtn.disabled = false;
+            }
+        });
+
+        function reset() {
+            amountInput.value = "";
+            amountInput.disabled = true;
+            submitBtn.disabled = true;
+            amountError.innerText = "";
+        }
+    </script>
 }

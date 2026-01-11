@@ -1,6 +1,139 @@
-﻿@{
-    ViewData["Title"] = "Payments";
+﻿@model IEnumerable<UtilityManagementSystem.ViewModels.PaymentHistoryViewModel>
+
+
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">Payment History</h2>
+
+    <!-- Filter Card -->
+    <div class="card shadow-sm rounded-lg card-hover mb-3" style="border:none">
+        <div class="card-body p-3">
+            <form method="get" class="d-flex flex-wrap gap-3 align-items-end">
+
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Customer</label>
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search customer..."
+                           value="@ViewBag.CurrentSearch" />
+                </div>
+
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Payment Method</label>
+                    <select name="method" class="form-control">
+                        <option value="">All</option>
+                        <option value="Cash" selected="@(ViewBag.CurrentMethod == "Cash")">Cash</option>
+                        <option value="Card" selected="@(ViewBag.CurrentMethod == "Card")">Card</option>
+                        <option value="Online" selected="@(ViewBag.CurrentMethod == "Online")">Online</option>
+                    </select>
+
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit"
+                            class="btn btn-primary px-4">
+                        Filter
+                    </button>
+
+                    <a asp-action="Create"
+                       class="btn btn-success px-4">
+                        Record Payment
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card shadow-sm rounded-lg card-hover overflow-hidden mb-3"
+         style="border:1px solid var(--bs-border-color);">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Amount Paid</th>
+                            <th>Date</th>
+                            <th>Method</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentTable">
+                        @{
+                            var index = 0;
+                        }
+
+                        @foreach (var p in Model)
+                        {
+                            <tr data-index="@index">
+                                <td>@p.Customer</td>
+                                <td>Rs. @p.AmountPaid.ToString("N2")</td>
+                                <td>@p.PaymentDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <span class="status-badge status-active">
+                                        @p.PaymentMethod
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Details"
+                                       asp-route-id="@p.PaymentId"
+                                       class="btn btn-primary btn-sm">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.Count() > 5)
+            {
+                <div class="py-2 text-center">
+                    <a href="javascript:void(0);" class="btn btn-link" id="showMoreBtn">
+                        Show More
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+
+</div>
+@section Scripts {
+    <script>
+        const rows = document.querySelectorAll("#paymentTable tr");
+        const showMoreBtn = document.getElementById("showMoreBtn");
+
+        const LIMIT = 5;
+        let expanded = sessionStorage.getItem("paymentsExpanded") === "true";
+
+        function applyLimit() {
+            rows.forEach((row, index) => {
+                row.style.display = expanded || index < LIMIT ? "" : "none";
+            });
+
+            if (showMoreBtn) {
+                showMoreBtn.innerText = expanded ? "Show Less" : "Show More";
+            }
+        }
+
+        if (rows.length > LIMIT) {
+            applyLimit();
+        }
+
+        if (showMoreBtn) {
+            showMoreBtn.addEventListener("click", () => {
+                expanded = !expanded;
+                sessionStorage.setItem("paymentsExpanded", expanded);
+                applyLimit();
+            });
+        }
+    </script>
 }
 
-<h1>Payments</h1>
-<p>Placeholder view</p>
+

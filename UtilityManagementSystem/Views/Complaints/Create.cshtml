@@ -1,5 +1,54 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model UtilityManagementSystem.ViewModels.ComplaintViewModel
+
 @{
+    ViewData["Title"] = "New Complaint";
 }
+
+<h2>New Complaint</h2>
+
+<form asp-action="Create" method="post" novalidate>
+    @Html.AntiForgeryToken()
+
+    <!-- Customer -->
+    <div class="form-group w-50 mb-3">
+        <label asp-for="CustomerId">Customer</label>
+        <select asp-for="CustomerId" class="form-control" asp-items="Model.Customers">
+            <option value="">-- Select Customer --</option>
+        </select>
+        <span asp-validation-for="CustomerId" class="text-danger"></span>
+    </div>
+
+    <!-- Utility -->
+    <div class="form-group w-50 mb-3">
+        <label asp-for="UtilityId">Utility</label>
+        <select asp-for="UtilityId" class="form-control" asp-items="Model.Utilities">
+            <option value="">-- Select Utility --</option>
+        </select>
+        <span asp-validation-for="UtilityId" class="text-danger"></span>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group w-50 mb-3">
+        <label asp-for="Status">Status</label>
+        <select asp-for="Status" class="form-control">
+            <option value="">-- Select Status --</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group w-50 mb-3">
+        <label asp-for="Description">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <!-- Submit -->
+    <div class="w-50 mb-3">
+        <button type="submit" class="btn btn-primary">Create Complaint</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>

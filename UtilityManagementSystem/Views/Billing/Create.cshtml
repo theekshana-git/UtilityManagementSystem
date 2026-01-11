@@ -1,5 +1,102 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@model UtilityManagementSystem.ViewModels.GenerateBillViewModel
+
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">Generate Bill</h2>
+
+    
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3 w-50">
+                    <label class="form-label text-body-secondary">Customer</label>
+                    <select id="customerDrop"
+                            class="form-control"
+                            asp-items="ViewBag.Customers">
+                        <option value="">-- Choose Customer --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3 w-50">
+                    <label class="form-label text-body-secondary">Meter</label>
+                    <select id="meterDrop"
+                            class="form-control"
+                            disabled>
+                        <option value="">-- Select Customer First --</option>
+                    </select>
+                </div>
+
+                <input type="hidden" asp-for="ReadingID" id="hiddenReadingID" />
+
+                <div class="d-flex gap-2 mt-4 w-50">
+                    <button type="submit"
+                            id="submitBtn"
+                            class="btn btn-primary px-4"
+                            disabled>
+                        Generate Bill
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-link mt-3">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+   
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $('#customerDrop').change(function () {
+                var customerId = $(this).val();
+                var meterDrop = $('#meterDrop');
+                resetForm();
+
+                if (customerId) {
+                    $.getJSON('@Url.Action("GetMetersByCustomer", "Billing")',
+                        { customerId: customerId },
+                        function (data) {
+                            meterDrop.empty().append('<option value="">-- Choose Meter --</option>');
+                            $.each(data, function (i, item) {
+                                meterDrop.append($('<option>', {
+                                    value: item.value,
+                                    text: item.text
+                                }));
+                            });
+                            meterDrop.prop('disabled', false);
+                        });
+                }
+            });
+
+            $('#meterDrop').change(function () {
+                var meterId = $(this).val();
+
+                if (meterId) {
+                    $.getJSON('@Url.Action("GetUnbilledReading", "Billing")',
+                        { meterId: meterId },
+                        function (data) {
+                            if (data && data.readingId) {
+                                $('#hiddenReadingID').val(data.readingId);
+                                $('#submitBtn').prop('disabled', false);
+                            } else {
+                                alert("This meter has no unbilled readings.");
+                                resetForm();
+                            }
+                        });
+                } else {
+                    resetForm();
+                }
+            });
+
+            function resetForm() {
+                $('#hiddenReadingID').val('');
+                $('#submitBtn').prop('disabled', true);
+            }
+        });
+    </script>
 }

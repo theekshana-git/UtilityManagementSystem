@@ -1,6 +1,223 @@
-﻿@{
-    ViewData["Title"] = "Tariffs";
+﻿@model IEnumerable<UtilityManagementSystem.ViewModels.TariffViewModel>
+
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">Tariffs</h2>
+
+    <!-- Filters -->
+    <div class="card shadow-sm rounded-lg card-hover mb-3"
+         style="border:none;">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap gap-3 align-items-end">
+
+                <!-- Search Utility -->
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Utility</label>
+                    <input type="text"
+                           id="searchInput"
+                           class="form-control text-light border-secondary"
+                           placeholder="Search utility..." />
+                </div>
+
+                <!-- Status Filter -->
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Utiltiy Type</label>
+                    <select id="TypeFilter"
+                            class="form-select text-light border-secondary">
+                        <option value="">All</option>
+                        <option value="electricity">Electricity</option>
+                        <option value="gas">Gas</option>
+                        <option value="water">Water</option>
+                    </select>
+
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button"
+                            class="btn btn-primary px-4"
+                            onclick="applyFilters()">
+                        Filter
+                    </button>
+
+                    <a class="btn btn-success px-4"
+                       asp-action="Create">
+                        Add Tariff
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm rounded-lg card-hover overflow-hidden mb-3"
+         style="border:1px solid var(--bs-border-color);">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Utility</th>
+                            <th>Slab Range</th>
+                            <th>Rate / Unit</th>
+                            <th>Fixed Charge</th>
+                            <th>Effective From</th>
+                            <th>Effective To</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tariffsTable">
+                        @{
+                            var index = 0;
+                        }
+                        @foreach (var t in Model)
+                        {
+                            var isActive = t.EffectiveTo == null;
+
+                            <tr data-index="@index">
+                                <td>
+                                    <span class="utility-badge utility-@t.UtilityName.ToLower()">
+                                        @t.UtilityName
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @t.SlabStart -
+                                    @(t.SlabEnd.HasValue ? t.SlabEnd.Value.ToString() : "Above")
+                                </td>
+                                <td>@t.RatePerUnit</td>
+                                <td>@t.FixedCharge</td>
+                                <td>@t.EffectiveFrom.ToShortDateString()</td>
+                                <td>
+                                    @(t.EffectiveTo.HasValue
+                                        ? t.EffectiveTo.Value.ToShortDateString()
+                                        : "-")
+                                </td>
+                                <td>
+                                <a asp-action="History"
+                                   asp-route-utilityId="@t.UtilityId"
+                                   asp-route-slabStart="@t.SlabStart"
+                                   asp-route-slabEnd="@t.SlabEnd"
+                                   class="btn btn-sm btn-primary">
+                                    History
+                                </a>
+
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.Count() > 5)
+            {
+                <div class="py-2 text-center">
+                    <a href="javascript:void(0);" class="btn btn-link" id="showMoreBtn">
+                        Show More
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section styles {
+    <style>
+        .card-hover {
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+
+            .card-hover:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0 0 2px rgba(13,110,253,0.25), 0 8px 20px rgba(0,0,0,0.10);
+            }
+
+        .utility-electricity {
+            font-weight:bold;
+        }
+
+        .utility-water {
+            font-weight: bold;
+        }
+
+        .utility-gas {
+            font-weight: bold;
+        }
+    </style>
 }
 
-<h1>Tariffs</h1>
-<p>Placeholder view</p>
+@section Scripts {
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            let value = this.value.toLowerCase();
+            document.querySelectorAll('#tariffsTable tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(value) ? '' : 'none';
+            });
+        });
+
+        function applyFilters() {
+            const searchValue = document
+                .getElementById("searchInput")
+                .value
+                .toLowerCase();
+
+            const typeValue = document
+                .getElementById("TypeFilter")
+                .value
+                .toLowerCase();
+
+            document.querySelectorAll("#tariffsTable tr").forEach(row => {
+
+                // Utility text (first column)
+                const utilityText = row
+                    .querySelector("td:first-child")
+                    .innerText
+                    .toLowerCase();
+
+                const rowText = row.innerText.toLowerCase();
+
+                const matchesSearch = rowText.includes(searchValue);
+                const matchesType = !typeValue || utilityText.includes(typeValue);
+
+                row.style.display = (matchesSearch && matchesType)
+                    ? ""
+                    : "none";
+            });
+        }
+
+        const rows = document.querySelectorAll("#tariffsTable tr");
+        const showMoreBtn = document.getElementById("showMoreBtn");
+        let expanded = sessionStorage.getItem("tariffsExpanded") === "true";
+
+        const LIMIT = 5;
+
+        function applyInitialLimit() {
+            rows.forEach((row, i) => {
+                row.style.display = i < LIMIT ? "" : "none";
+            });
+        }
+
+        if (rows.length > LIMIT) {
+            if (expanded) {
+                rows.forEach(row => row.style.display = "");
+                if (showMoreBtn) showMoreBtn.innerText = "Show Less";
+            } else {
+                applyInitialLimit();
+            }
+        }
+
+        if (showMoreBtn) {
+            showMoreBtn.addEventListener("click", () => {
+                expanded = !expanded;
+                sessionStorage.setItem("tariffsExpanded", expanded);
+
+                rows.forEach((row, i) => {
+                    row.style.display = expanded || i < LIMIT ? "" : "none";
+                });
+
+                showMoreBtn.innerText = expanded ? "Show Less" : "Show More";
+            });
+        }
+    </script>
+}

@@ -1,6 +1,156 @@
-﻿@{
-    ViewData["Title"] = "Complaints";
+﻿@model IEnumerable<UtilityManagementSystem.ViewModels.ComplaintSummaryViewModel>
+
+<div class="container-fluid ums-container ums-content">
+
+    <h2 class="fw-semibold mb-3">Complaints</h2>
+
+    <!-- Filters Card -->
+    <div class="card shadow-sm rounded-lg card-hover mb-3" style="border:none">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap gap-3 align-items-end">
+
+                <!-- Status Filter -->
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Status</label>
+                    <select id="statusFilter" class="form-control">
+                        <option value="">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+
+                </div>
+
+                <!-- Customer Filter -->
+                <div class="flex-grow-1" style="min-width:200px;">
+                    <label class="text-body-secondary">Customer</label>
+                    <input type="text" id="customerSearch" class="form-control" placeholder="Search customers..." />
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex gap-3">
+                    <button class="btn btn-primary px-4" onclick="applyFilters()">Filter</button>
+                    <a class="btn btn-success px-4" asp-action="Create">New Complaint</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Complaints Table Card -->
+    <div class="card shadow-sm rounded-lg card-hover overflow-hidden mb-3"
+         style="border:1px solid var(--bs-border-color);">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Utility</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="complaintsTable">
+                        @for (int i = 0; i < Model.Count(); i++)
+                        {
+                            var c = Model.ElementAt(i);
+                            <tr class="complaint-row" data-index="@i" style="display:@(i < 5 ? "" : "none")">
+                                <td>@c.ComplaintId</td>
+                                <td>@c.CustomerName</td>
+                                <td>@c.UtilityName</td> <!-- Changed to UtilityName -->
+                                <td>
+                                    <span class="status-badge @(c.Status == "Pending" ? "status-pending" : c.Status == "In Progress" ? "status-progress" : "status-resolved")">
+                                        @c.Status
+                                    </span>
+                                </td>
+                                <td>@c.ComplaintDate?.ToString("dd MMM yyyy")</td>
+                                <td class="text-center">
+                                    <a asp-action="Details" asp-route-id="@c.ComplaintId" class="btn btn-primary btn-sm">View</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.Count() > 5)
+            {
+                <div class="py-2 text-center">
+                    <a href="javascript:void(0);" class="btn btn-link" id="showMoreBtn">Show More</a>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+@section Styles {
+    <style>
+        .card-hover {
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+
+            .card-hover:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0 0 2px rgba(13,110,253,0.25), 0 8px 20px rgba(0,0,0,0.10);
+            }
+
+        .status-badge {
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .status-pending {
+            color: #ef4444; /* Red text */
+            background-color: rgba(239,68,68,0.2); /* Red transparent bg */
+        }
+
+        .status-progress {
+            color: #facc15; /* Yellow text */
+            background-color: rgba(250,204,21,0.2); /* Yellow transparent bg */
+        }
+
+        .status-resolved {
+            color: #22c55e; /* Green text */
+            background-color: rgba(34,197,94,0.2); /* Green transparent bg */
+        }
+
+    </style>
 }
 
-<h1>Complaints</h1>
-<p>Placeholder view</p>
+@section Scripts {
+    <script>
+        const rows = document.querySelectorAll("#complaintsTable tr");
+        const showMoreBtn = document.getElementById("showMoreBtn");
+        const LIMIT = 5;
+        let expanded = false;
+
+        showMoreBtn?.addEventListener("click", () => {
+            expanded = !expanded;
+            rows.forEach((row, i) => row.style.display = (expanded || i < LIMIT) ? "" : "none");
+            showMoreBtn.innerText = expanded ? "Show Less" : "Show More";
+        });
+
+        // Filters
+        document.getElementById('customerSearch').addEventListener('keyup', applyFilters);
+        function applyFilters() {
+            const statusValue = document.getElementById("statusFilter").value.toLowerCase();
+            const customerValue = document.getElementById("customerSearch").value.toLowerCase();
+
+            rows.forEach(row => {
+                const rowStatus = row.querySelector("td:nth-child(4)").innerText.toLowerCase();
+                const rowCustomer = row.querySelector("td:nth-child(2)").innerText.toLowerCase();
+
+                const statusMatch = !statusValue || rowStatus === statusValue;
+                const customerMatch = !customerValue || rowCustomer.includes(customerValue);
+
+                row.style.display = (statusMatch && customerMatch) ? "" : "none";
+            });
+        }
+    </script>
+}
